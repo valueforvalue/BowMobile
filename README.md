@@ -21,24 +21,17 @@ To run this tool, you need the following installed and in your system PATH:
 3.  Place your Canon Parts Catalog PDF files into the `Parts/` folder.
 4.  Run `go mod tidy` to install dependencies.
 
-## Usage
-
-### 1. Build the Database
-Run the parser to scan the `Parts` folder and populate the database:
+### 3. Launch the Web Interface
+Run the standalone web server to search and cross-reference parts:
 ```bash
-go run main.go
+go run server.go
 ```
-This will:
-- Decrypt manuals into temporary files.
-- Extract Model Series and Revision information.
-- Parse all part numbers, keys, and descriptions.
-- Save everything into `parts.db`.
+Then open your browser to [http://localhost:8080](http://localhost:8080).
 
-### 2. Check Results / Cross-Reference
-Run the check script to see a summary and sample cross-reference matches:
-```bash
-go run check_db.go
-```
+## Features
+- **Smart Search**: Enter a partial part number (with or without hyphens) or a description.
+- **Cross-Reference Grouping**: Results are grouped by Base Part, showing all models that use that part in one view.
+- **Detailed Metadata**: See exactly which Figure and Key Number to look for in each model's manual.
 
 ## Project Structure
 - `main.go`: The core parser and database builder.
