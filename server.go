@@ -32,7 +32,8 @@ var db *sql.DB
 
 func main() {
 	var err error
-	db, err = sql.Open("sqlite", "parts.db")
+	// Open with read-only and shared cache mode for better concurrency
+	db, err = sql.Open("sqlite", "file:parts.db?mode=ro&_journal_mode=WAL")
 	if err != nil {
 		log.Fatal(err)
 	}

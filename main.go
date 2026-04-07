@@ -70,7 +70,6 @@ func main() {
 		}
 		fmt.Printf("Done (%v)\n", time.Since(manualStart).Round(time.Millisecond))
 
-		// Extract Model and Revision
 		info := extractManualInfo(tempPath, fname)
 		fmt.Printf("Detected: %s (Rev %s)\n", info.ModelSeries, info.Revision)
 
@@ -92,41 +91,25 @@ func main() {
 
 func extractManualInfo(pdfPath, filename string) ManualInfo {
 	info := ManualInfo{ModelSeries: "Unknown", Revision: "Unknown"}
-
-	// 1. Filename extraction
-	// Try various patterns:
-	// imageRUNNER_ADVANCE_DX_...
-	// imageFORCE_...
-	// imagePRESS_...
-	
-	// Try to get revision first
 	reRev := regexp.MustCompile(`_r(\d+)_`)
 	if revMatch := reRev.FindStringSubmatch(filename); len(revMatch) > 1 {
 		info.Revision = revMatch[1]
 	}
-
-	// Try to get model series
-	// Look for everything between the prefix (imageFORCE/imagePRESS/imageRUNNER_ADVANCE_DX/etc) and the _PC or _Series marker
 	reModel := regexp.MustCompile(`(?:imageFORCE|imagePRESS|imagePRESS_Lite|imageRUNNER_ADVANCE|imageRUNNER_ADVANCE_DX)_([A-Z0-9_]+)_(?:PC|Series)`)
 	if m := reModel.FindStringSubmatch(filename); len(m) > 1 {
 		info.ModelSeries = strings.ReplaceAll(m[1], "_", "/")
 	}
-
-	// 2. First Page content extraction (Fallback/Confirm)
 	pdftotextPath := `C:\Program Files\Git\mingw64\bin\pdftotext.exe`
-	cmd := exec.Command(pdftotextPath, "-l", "3", pdfPath, "-")
+	cmd := exec.Command(pdftotextPath, "-l", "5", pdfPath, "-")
 	output, err := cmd.Output()
 	if err == nil {
 		content := string(output)
-		
 		if info.Revision == "Unknown" {
 			if revMatch := regexp.MustCompile(`Rev\.\s*(\d+)`).FindStringSubmatch(content); revMatch != nil {
 				info.Revision = revMatch[1]
 			}
 		}
-
 		if info.ModelSeries == "Unknown" {
-			// Look for "imageRUNNER ADVANCE [MODEL]" or similar
 			patterns := []string{
 				`imageRUNNER\s+ADVANCE\s+DX\s+([A-Z0-9 /iF]+?)(?:\s+Series|\s+C\d+)`,
 				`imageRUNNER\s+ADVANCE\s+([A-Z0-9 /iF]+?)(?:\s+Series|\s+C\d+)`,
@@ -141,13 +124,13 @@ func extractManualInfo(pdfPath, filename string) ManualInfo {
 			}
 		}
 	}
-
 	return info
 }
 
 func processWithPDFToText(db *sql.DB, pdfPath string, manualID int64) {
 	pdftotextPath := `C:\Program Files\Git\mingw64\bin\pdftotext.exe`
-	cmd := exec.Command(pdftotextPath, "-layout", pdfPath, "-")
+	// Using -table instead of -layout
+	cmd := exec.Command(pdftotextPath, "-table", pdfPath, "-")
 	output, err := cmd.Output()
 	if err != nil {
 		log.Printf("Error running pdftotext: %v", err)
@@ -157,7 +140,14 @@ func processWithPDFToText(db *sql.DB, pdfPath string, manualID int64) {
 	content := string(output)
 	lines := strings.Split(content, "\n")
 	
-	partRegex := regexp.MustCompile(`(\d+)\s+([A-Z0-9]{3}-[A-Z0-9]{4})-([A-Z0-9]{3})\s+(\d*)\s*(.*)`)
+	// Refined Regex for Table output:
+	// - Expect a Key No (\d{1,3}) followed by multiple spaces
+	// - Expect Part Number XXX-XXXX-XXX followed by multiple spaces
+	// - Expect optional Qty (\d*)
+	// - Expect Description (non-greedy)
+	// - Stop at 2 or more spaces (end of column) or end of line
+	partRegex := regexp.MustCompile(`(?m)(?:^|\s{2,})(\d{1,3})\s{2,}([A-Z0-9]{3}-[A-Z0-9]{4})-([A-Z0-9]{3})\s{1,}(\d*)\s+(.*?)(\s{2,}|\r|\n|$)`)
+	
 	var currentFigureID string
 
 	for _, line := range lines {
@@ -173,17 +163,28 @@ func processWithPDFToText(db *sql.DB, pdfPath string, manualID int64) {
 			}
 		}
 
+		if strings.HasPrefix(currentFigureID, "SNL") {
+			continue
+		}
+
 		if currentFigureID != "" {
 			matches := partRegex.FindAllStringSubmatch(line, -1)
 			for _, m := range matches {
-				part := Part{
+				desc := strings.TrimSpace(m[5])
+				if len(desc) < 3 {
+					continue
+				}
+				if strings.Contains(desc, "COPYRIGHT") || strings.Contains(desc, "202") || strings.Contains(desc, "Page") {
+					continue
+				}
+				
+				savePart(db, manualID, currentFigureID, Part{
 					KeyNo:       m[1],
 					BasePart:    m[2],
 					Revision:    m[3],
 					Qty:         m[4],
-					Description: strings.TrimSpace(m[5]),
-				}
-				savePart(db, manualID, currentFigureID, part)
+					Description: desc,
+				})
 			}
 		}
 	}
@@ -193,20 +194,9 @@ func initDB(db *sql.DB) error {
 	db.Exec("DROP TABLE IF EXISTS parts")
 	db.Exec("DROP TABLE IF EXISTS figures")
 	db.Exec("DROP TABLE IF EXISTS manuals")
-	
 	sqlStmt := `
-	CREATE TABLE manuals (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		filename TEXT,
-		model_series TEXT,
-		revision TEXT
-	);
-	CREATE TABLE figures (
-		manual_id INTEGER,
-		id TEXT,
-		PRIMARY KEY (manual_id, id),
-		FOREIGN KEY(manual_id) REFERENCES manuals(id)
-	);
+	CREATE TABLE manuals (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT, model_series TEXT, revision TEXT);
+	CREATE TABLE figures (manual_id INTEGER, id TEXT, PRIMARY KEY (manual_id, id), FOREIGN KEY(manual_id) REFERENCES manuals(id));
 	CREATE TABLE parts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		manual_id INTEGER,
