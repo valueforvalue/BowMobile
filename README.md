@@ -60,6 +60,14 @@ To run or develop this project on a new machine, ensure the following are instal
 
 ---
 
+## 🗺️ Roadmap
+- [ ] **Incremental Updates**: Modify the builder to skip manuals already in the database, allowing for faster updates without full rebuilds.
+- [ ] **Accessory Expansion**: Ingest part catalogs for finishers, paper decks, and other peripherals to broaden cross-reference coverage.
+- [ ] **Client Release Mode**: Package a "Light" version of the tool containing only the Web UI and a pre-built database.
+- [ ] **Cloud Sync**: Implement an option for the client to check GitHub for an updated `parts.db` file and download it automatically.
+
+---
+
 ## 📝 Developer Notes (For Gemini CLI)
 - **Regex Strategy**: The primary matcher is `(?m)(?:^|\s{2,})(\d{1,3})\s{2,}([A-Z0-9]{3}-[A-Z0-9]{4})-([A-Z0-9]{3})\s{1,}(\d*)\s+(.*?)(\s{2,}|\r|\n|$)`.
 - **Database Schema**: Uses `manuals`, `figures`, and `parts` tables. `base_part` is indexed for $O(1)$ search performance.
