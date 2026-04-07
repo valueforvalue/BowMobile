@@ -39,23 +39,39 @@ func main() {
 		log.Fatal(err)
 	}
 
-	files, err := os.ReadDir("Parts")
-	if err != nil {
-		log.Fatal(err)
+	var filesToProcess []string
+	if len(os.Args) > 1 {
+		// Single file mode
+		filesToProcess = append(filesToProcess, os.Args[1])
+	} else {
+		// Folder mode
+		entries, err := os.ReadDir("Parts")
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, e := range entries {
+			fname := e.Name()
+			if strings.HasSuffix(strings.ToLower(fname), ".pdf") &&
+				fname != "decrypted.pdf" &&
+				fname != "temp_decrypted.pdf" {
+				filesToProcess = append(filesToProcess, filepath.Join("Parts", fname))
+			}
+		}
 	}
 
 	totalStart := time.Now()
 
-	for _, file := range files {
-		fname := file.Name()
-		if !strings.HasSuffix(strings.ToLower(fname), ".pdf") || 
-		   fname == "decrypted.pdf" || 
-		   fname == "temp_decrypted.pdf" {
+	for _, pdfPath := range filesToProcess {
+		fname := filepath.Base(pdfPath)
+		
+		// Skip if already in DB
+		var exists bool
+		db.QueryRow("SELECT EXISTS(SELECT 1 FROM manuals WHERE filename=?)", fname).Scan(&exists)
+		if exists && len(os.Args) == 1 {
 			continue
 		}
 
 		manualStart := time.Now()
-		pdfPath := filepath.Join("Parts", fname)
 		fmt.Printf("\n--- Starting: %s ---\n", fname)
 
 		tempPath := filepath.Join("Parts", "temp_decrypted.pdf")
@@ -86,10 +102,11 @@ func main() {
 		fmt.Printf("--- Finished: %s (Time: %v) ---\n", fname, time.Since(manualStart).Round(time.Second))
 	}
 
-	fmt.Printf("\nAll manuals processed in %v\n", time.Since(totalStart).Round(time.Second))
+	fmt.Printf("\nProcessing complete in %v\n", time.Since(totalStart).Round(time.Second))
 }
 
 func extractManualInfo(pdfPath, filename string) ManualInfo {
+// ... (rest of the file unchanged)
 	info := ManualInfo{ModelSeries: "Unknown", Revision: "Unknown"}
 	reRev := regexp.MustCompile(`_r(\d+)_`)
 	if revMatch := reRev.FindStringSubmatch(filename); len(revMatch) > 1 {
@@ -129,7 +146,6 @@ func extractManualInfo(pdfPath, filename string) ManualInfo {
 
 func processWithPDFToText(db *sql.DB, pdfPath string, manualID int64) {
 	pdftotextPath := `C:\Program Files\Git\mingw64\bin\pdftotext.exe`
-	// Using -table instead of -layout
 	cmd := exec.Command(pdftotextPath, "-table", pdfPath, "-")
 	output, err := cmd.Output()
 	if err != nil {
@@ -140,19 +156,17 @@ func processWithPDFToText(db *sql.DB, pdfPath string, manualID int64) {
 	content := string(output)
 	lines := strings.Split(content, "\n")
 	
-	// Refined Regex for Table output:
-	// - Expect a Key No (\d{1,3}) followed by multiple spaces
-	// - Expect Part Number XXX-XXXX-XXX followed by multiple spaces
-	// - Expect optional Qty (\d*)
-	// - Expect Description (non-greedy)
-	// - Stop at 2 or more spaces (end of column) or end of line
-	partRegex := regexp.MustCompile(`(?m)(?:^|\s{2,})(\d{1,3})\s{2,}([A-Z0-9]{3}-[A-Z0-9]{4})-([A-Z0-9]{3})\s{1,}(\d*)\s+(.*?)(\s{2,}|\r|\n|$)`)
+	// Anchor on Part Number: XXX-XXXX-XXX
+	anchorRegex := regexp.MustCompile(`([A-Z0-9]{3}-[A-Z0-9]{4})-([A-Z0-9]{3})`)
+	qtyRegex := regexp.MustCompile(`^(\d+)\s+(.*)$`)
+	keyNoRegex := regexp.MustCompile(`^\d{1,3}$`)
 	
 	var currentFigureID string
 
 	for _, line := range lines {
 		line = strings.TrimRight(line, "\r\n")
 		
+		// 1. Noise Filter & Figure Detection
 		if strings.Contains(line, "Figure") {
 			fParts := strings.Split(line, "Figure")
 			if len(fParts) > 1 {
@@ -161,43 +175,60 @@ func processWithPDFToText(db *sql.DB, pdfPath string, manualID int64) {
 					currentFigureID = fIDMatch[1]
 				}
 			}
-		}
-
-		if strings.HasPrefix(currentFigureID, "SNL") {
 			continue
 		}
 
-		if currentFigureID != "" {
-			matches := partRegex.FindAllStringSubmatch(line, -1)
-			for _, m := range matches {
-				desc := strings.TrimSpace(m[5])
-				if len(desc) < 3 {
-					continue
-				}
-				if strings.Contains(desc, "COPYRIGHT") || strings.Contains(desc, "202") || strings.Contains(desc, "Page") {
-					continue
-				}
-				
-				savePart(db, manualID, currentFigureID, Part{
-					KeyNo:       m[1],
-					BasePart:    m[2],
-					Revision:    m[3],
-					Qty:         m[4],
-					Description: desc,
-				})
-			}
+		if strings.HasPrefix(currentFigureID, "SNL") || currentFigureID == "" {
+			continue
 		}
+
+		if strings.Contains(line, "Page") || strings.Contains(line, "Copyright") || strings.Contains(line, "202") {
+			continue
+		}
+
+		// 2. Find Part Number Anchor
+		loc := anchorRegex.FindStringSubmatchIndex(line)
+		if loc == nil {
+			continue
+		}
+
+		// 3. Extract Fields
+		basePart := line[loc[2]:loc[3]]
+		revision := line[loc[4]:loc[5]]
+		
+		// KeyNo is to the left of the anchor
+		keyNo := strings.TrimSpace(line[:loc[0]])
+		
+		// Description and Qty are to the right
+		rightSide := strings.TrimSpace(line[loc[1]:])
+		qty := ""
+		description := rightSide
+		
+		if qr := qtyRegex.FindStringSubmatch(rightSide); len(qr) > 2 {
+			qty = qr[1]
+			description = qr[2]
+		}
+
+		// 4. Validation
+		if !keyNoRegex.MatchString(keyNo) || len(description) < 3 {
+			continue
+		}
+
+		savePart(db, manualID, currentFigureID, Part{
+			KeyNo:       keyNo,
+			BasePart:    basePart,
+			Revision:    revision,
+			Qty:         qty,
+			Description: description,
+		})
 	}
 }
 
 func initDB(db *sql.DB) error {
-	db.Exec("DROP TABLE IF EXISTS parts")
-	db.Exec("DROP TABLE IF EXISTS figures")
-	db.Exec("DROP TABLE IF EXISTS manuals")
 	sqlStmt := `
-	CREATE TABLE manuals (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT, model_series TEXT, revision TEXT);
-	CREATE TABLE figures (manual_id INTEGER, id TEXT, PRIMARY KEY (manual_id, id), FOREIGN KEY(manual_id) REFERENCES manuals(id));
-	CREATE TABLE parts (
+	CREATE TABLE IF NOT EXISTS manuals (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT UNIQUE, model_series TEXT, revision TEXT);
+	CREATE TABLE IF NOT EXISTS figures (manual_id INTEGER, id TEXT, PRIMARY KEY (manual_id, id), FOREIGN KEY(manual_id) REFERENCES manuals(id));
+	CREATE TABLE IF NOT EXISTS parts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		manual_id INTEGER,
 		figure_id TEXT,
@@ -209,18 +240,21 @@ func initDB(db *sql.DB) error {
 		description TEXT,
 		FOREIGN KEY(manual_id) REFERENCES manuals(id)
 	);
-	CREATE INDEX idx_base_part ON parts(base_part);
+	CREATE INDEX IF NOT EXISTS idx_base_part ON parts(base_part);
 	`
 	_, err := db.Exec(sqlStmt)
 	return err
 }
 
 func saveManual(db *sql.DB, filename, model, rev string) (int64, error) {
-	res, err := db.Exec("INSERT INTO manuals (filename, model_series, revision) VALUES (?, ?, ?)", filename, model, rev)
+	_, err := db.Exec("INSERT OR IGNORE INTO manuals (filename, model_series, revision) VALUES (?, ?, ?)", filename, model, rev)
 	if err != nil {
 		return 0, err
 	}
-	return res.LastInsertId()
+	
+	var id int64
+	err = db.QueryRow("SELECT id FROM manuals WHERE filename = ?", filename).Scan(&id)
+	return id, err
 }
 
 func savePart(db *sql.DB, manualID int64, figureID string, p Part) {
