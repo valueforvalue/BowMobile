@@ -93,40 +93,51 @@ func main() {
 func extractManualInfo(pdfPath, filename string) ManualInfo {
 	info := ManualInfo{ModelSeries: "Unknown", Revision: "Unknown"}
 
-	// 1. More aggressive filename extraction
-	// We look for anything between DX_ and the next marker (_Series or _PC)
-	reFilename := regexp.MustCompile(`DX_([^_]+(?:_[^_]+)*?)_(?:Series|PC)`)
-	fMatches := reFilename.FindStringSubmatch(filename)
-	if len(fMatches) > 1 {
-		info.ModelSeries = strings.ReplaceAll(fMatches[1], "_", "/")
-	}
+	// 1. Filename extraction
+	// Try various patterns:
+	// imageRUNNER_ADVANCE_DX_...
+	// imageFORCE_...
+	// imagePRESS_...
 	
+	// Try to get revision first
 	reRev := regexp.MustCompile(`_r(\d+)_`)
-	revMatch := reRev.FindStringSubmatch(filename)
-	if len(revMatch) > 1 {
+	if revMatch := reRev.FindStringSubmatch(filename); len(revMatch) > 1 {
 		info.Revision = revMatch[1]
 	}
 
-	// 2. First Page content extraction (Secondary/Backup)
+	// Try to get model series
+	// Look for everything between the prefix (imageFORCE/imagePRESS/imageRUNNER_ADVANCE_DX/etc) and the _PC or _Series marker
+	reModel := regexp.MustCompile(`(?:imageFORCE|imagePRESS|imagePRESS_Lite|imageRUNNER_ADVANCE|imageRUNNER_ADVANCE_DX)_([A-Z0-9_]+)_(?:PC|Series)`)
+	if m := reModel.FindStringSubmatch(filename); len(m) > 1 {
+		info.ModelSeries = strings.ReplaceAll(m[1], "_", "/")
+	}
+
+	// 2. First Page content extraction (Fallback/Confirm)
 	pdftotextPath := `C:\Program Files\Git\mingw64\bin\pdftotext.exe`
-	// Read first 5 pages to be safe, sometimes series info is on page 2 or 3
-	cmd := exec.Command(pdftotextPath, "-l", "5", pdfPath, "-")
+	cmd := exec.Command(pdftotextPath, "-l", "3", pdfPath, "-")
 	output, err := cmd.Output()
 	if err == nil {
 		content := string(output)
 		
 		if info.Revision == "Unknown" {
-			revMatch := regexp.MustCompile(`Rev\.\s*(\d+)`).FindStringSubmatch(content)
-			if revMatch != nil {
+			if revMatch := regexp.MustCompile(`Rev\.\s*(\d+)`).FindStringSubmatch(content); revMatch != nil {
 				info.Revision = revMatch[1]
 			}
 		}
 
-		if info.ModelSeries == "Unknown" || info.ModelSeries == "" {
-			// Look for "imageRUNNER ADVANCE DX [MODEL]"
-			seriesMatch := regexp.MustCompile(`DX\s+([A-Z0-9 /iF]+?)(?:\s+Series|\s+C\d+)`).FindStringSubmatch(content)
-			if seriesMatch != nil {
-				info.ModelSeries = strings.TrimSpace(seriesMatch[1])
+		if info.ModelSeries == "Unknown" {
+			// Look for "imageRUNNER ADVANCE [MODEL]" or similar
+			patterns := []string{
+				`imageRUNNER\s+ADVANCE\s+DX\s+([A-Z0-9 /iF]+?)(?:\s+Series|\s+C\d+)`,
+				`imageRUNNER\s+ADVANCE\s+([A-Z0-9 /iF]+?)(?:\s+Series|\s+C\d+)`,
+				`imageFORCE\s+([A-Z0-9 /iF]+?)(?:\s+Series|\s+C\d+)`,
+				`imagePRESS\s+([A-Z0-9 /iF]+?)(?:\s+Series|\s+C\d+)`,
+			}
+			for _, p := range patterns {
+				if m := regexp.MustCompile(p).FindStringSubmatch(content); m != nil {
+					info.ModelSeries = strings.TrimSpace(m[1])
+					break
+				}
 			}
 		}
 	}
