@@ -94,6 +94,20 @@ func (a *App) GetModels() string {
 	return sb.String()
 }
 
+// GetDBInfo returns the last updated date of the database
+func (a *App) GetDBInfo() string {
+	if a.db == nil {
+		return "Unknown"
+	}
+
+	var lastUpdated string
+	err := a.db.QueryRow("SELECT last_updated FROM metadata WHERE id = 1").Scan(&lastUpdated)
+	if err != nil {
+		return "Unknown"
+	}
+	return lastUpdated
+}
+
 func (a *App) performSmartSearch(q string) []GroupedResult {
 	if q == "" || a.db == nil {
 		return nil

@@ -50,11 +50,18 @@
         <!-- Footer -->
         <div class="mt-20 pb-10 text-center text-gray-400 text-xs border-t border-gray-200 pt-8">
             <p>Bow Copier Parts Cross-Reference v1.1.2</p>
+            <p class="mt-1">Database Last Updated: <span id="db-info">Loading...</span></p>
             <p class="mt-1">&copy; 2026</p>
         </div>
     </div>
 
     <script>
+        window.onload = function() {
+            window.go.main.App.GetDBInfo().then(result => {
+                document.getElementById('db-info').innerText = result;
+            });
+        };
+
         document.getElementById('search-form').onsubmit = function(e) {
             e.preventDefault();
             const q = document.getElementById('query').value;

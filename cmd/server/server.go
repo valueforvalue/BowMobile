@@ -107,7 +107,7 @@ func openBrowser(url string) {
 }
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
-	Layout("", nil).Render(r.Context(), w)
+	Layout("", nil, getDBInfo()).Render(r.Context(), w)
 }
 
 func handleSearch(w http.ResponseWriter, r *http.Request) {
@@ -121,7 +121,7 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Otherwise return the full layout
-	Layout(query, results).Render(r.Context(), w)
+	Layout(query, results, getDBInfo()).Render(r.Context(), w)
 }
 
 func performSmartSearch(q string) []bow.GroupedResult {
@@ -195,4 +195,17 @@ func performSmartSearch(q string) []bow.GroupedResult {
 	}
 
 	return finalResults
+}
+
+func getDBInfo() string {
+	if db == nil {
+		return "Unknown"
+	}
+
+	var lastUpdated string
+	err := db.QueryRow("SELECT last_updated FROM metadata WHERE id = 1").Scan(&lastUpdated)
+	if err != nil {
+		return "Unknown"
+	}
+	return lastUpdated
 }

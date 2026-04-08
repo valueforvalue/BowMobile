@@ -94,6 +94,16 @@ func main() {
 	}
 
 	fmt.Printf("\nProcessing complete in %v\n", time.Since(totalStart).Round(time.Second))
+
+	updateMetadata(db)
+}
+
+func updateMetadata(db *sql.DB) {
+	now := time.Now().Format("2006-01-02 15:04:05")
+	_, err := db.Exec("INSERT OR REPLACE INTO metadata (id, last_updated) VALUES (1, ?)", now)
+	if err != nil {
+		log.Printf("Error updating metadata: %v", err)
+	}
 }
 
 func extractManualInfo(pdfPath, filename string) bow.ManualInfo {
@@ -227,6 +237,7 @@ func initDB(db *sql.DB) error {
 	sqlStmt := `
 	CREATE TABLE IF NOT EXISTS manuals (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT UNIQUE, model_series TEXT, revision TEXT);
 	CREATE TABLE IF NOT EXISTS figures (manual_id INTEGER, id TEXT, PRIMARY KEY (manual_id, id), FOREIGN KEY(manual_id) REFERENCES manuals(id));
+	CREATE TABLE IF NOT EXISTS metadata (id INTEGER PRIMARY KEY, last_updated TEXT);
 	CREATE TABLE IF NOT EXISTS parts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		manual_id INTEGER,

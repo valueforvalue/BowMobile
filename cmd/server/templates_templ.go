@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "bow"
 
-func Layout(query string, results []bow.GroupedResult) templ.Component {
+func Layout(query string, results []bow.GroupedResult, dbInfo string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -65,7 +65,20 @@ func Layout(query string, results []bow.GroupedResult) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</p><p class=\"mt-1\">&copy; 2026</p></div></div><script>\r\n\t\t\tfunction toggleRowHighlight(checkbox) {\r\n\t\t\t\tconst row = checkbox.closest('tr');\r\n\t\t\t\tif (checkbox.checked) {\r\n\t\t\t\t\trow.classList.add('row-selected');\r\n\t\t\t\t} else {\r\n\t\t\t\t\trow.classList.remove('row-selected');\r\n\t\t\t\t}\r\n\t\t\t}\r\n\r\n\t\t\tfunction printSelected() {\r\n\t\t\t\tconst selectedRows = document.querySelectorAll('.part-checkbox:checked');\r\n\t\t\t\tif (selectedRows.length === 0) {\r\n\t\t\t\t\talert('Please select at least one part to print.');\r\n\t\t\t\t\treturn;\r\n\t\t\t\t}\r\n\r\n\t\t\t\tconst printWindow = window.open('', '_blank');\r\n\t\t\t\tlet content = \"<html><head><title>Parts List Selection</title>\";\r\n\t\t\t\tcontent += \"<style>body { font-family: sans-serif; padding: 40px; } h1 { text-align: center; color: #333; } table { width: 100%; border-collapse: collapse; margin-top: 20px; } th, td { border: 1px solid #ddd; padding: 12px; text-align: left; } th { background-color: #f2f2f2; }</style>\";\r\n\t\t\t\tcontent += \"</head><body><h1>Selected Parts List</h1><table><thead><tr><th>Base Part</th><th>Description</th><th>Model / Series</th><th>Figure</th><th>Key No</th><th>Full Part Number</th><th>Remarks</th></tr></thead><tbody>\";\r\n\r\n\t\t\t\tselectedRows.forEach(cb => {\r\n\t\t\t\t\tconst row = cb.closest('tr');\r\n\t\t\t\t\tconst card = row.closest('.result-card');\r\n\t\t\t\t\tconst header = card.querySelector('h2');\r\n\t\t\t\t\t\r\n\t\t\t\t\tconst basePart = header.getAttribute('data-basepart');\r\n\t\t\t\t\tconst description = header.getAttribute('data-description');\r\n\t\t\t\t\t\r\n\t\t\t\t\tconst cells = row.querySelectorAll('td');\r\n\t\t\t\t\tcontent += \"<tr>\";\r\n\t\t\t\t\tcontent += \"<td>\" + basePart + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + description + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + cells[1].innerText + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + cells[3].innerText + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + cells[4].innerText + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + cells[5].innerText + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + cells[6].innerText + \"</td>\";\r\n\t\t\t\t\tcontent += \"</tr>\";\r\n\t\t\t\t});\r\n\r\n\t\t\t\tcontent += \"</tbody></table>\";\r\n\t\t\t\tcontent += \"<script>window.onload = function() { window.print(); window.close(); }<\\/script>\";\r\n\t\t\t\tcontent += \"</body></html>\";\r\n\r\n\t\t\t\tprintWindow.document.write(content);\r\n\t\t\t\tprintWindow.document.close();\r\n\t\t\t}\r\n\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</p><p class=\"mt-1\">Database Last Updated: ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(dbInfo)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 59, Col: 51}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</p><p class=\"mt-1\">&copy; 2026</p></div></div><script>\r\n\t\t\tfunction toggleRowHighlight(checkbox) {\r\n\t\t\t\tconst row = checkbox.closest('tr');\r\n\t\t\t\tif (checkbox.checked) {\r\n\t\t\t\t\trow.classList.add('row-selected');\r\n\t\t\t\t} else {\r\n\t\t\t\t\trow.classList.remove('row-selected');\r\n\t\t\t\t}\r\n\t\t\t}\r\n\r\n\t\t\tfunction printSelected() {\r\n\t\t\t\tconst selectedRows = document.querySelectorAll('.part-checkbox:checked');\r\n\t\t\t\tif (selectedRows.length === 0) {\r\n\t\t\t\t\talert('Please select at least one part to print.');\r\n\t\t\t\t\treturn;\r\n\t\t\t\t}\r\n\r\n\t\t\t\tconst printWindow = window.open('', '_blank');\r\n\t\t\t\tlet content = \"<html><head><title>Parts List Selection</title>\";\r\n\t\t\t\tcontent += \"<style>body { font-family: sans-serif; padding: 40px; } h1 { text-align: center; color: #333; } table { width: 100%; border-collapse: collapse; margin-top: 20px; } th, td { border: 1px solid #ddd; padding: 12px; text-align: left; } th { background-color: #f2f2f2; }</style>\";\r\n\t\t\t\tcontent += \"</head><body><h1>Selected Parts List</h1><table><thead><tr><th>Base Part</th><th>Description</th><th>Model / Series</th><th>Figure</th><th>Key No</th><th>Full Part Number</th><th>Remarks</th></tr></thead><tbody>\";\r\n\r\n\t\t\t\tselectedRows.forEach(cb => {\r\n\t\t\t\t\tconst row = cb.closest('tr');\r\n\t\t\t\t\tconst card = row.closest('.result-card');\r\n\t\t\t\t\tconst header = card.querySelector('h2');\r\n\t\t\t\t\t\r\n\t\t\t\t\tconst basePart = header.getAttribute('data-basepart');\r\n\t\t\t\t\tconst description = header.getAttribute('data-description');\r\n\t\t\t\t\t\r\n\t\t\t\t\tconst cells = row.querySelectorAll('td');\r\n\t\t\t\t\tcontent += \"<tr>\";\r\n\t\t\t\t\tcontent += \"<td>\" + basePart + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + description + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + cells[1].innerText + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + cells[3].innerText + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + cells[4].innerText + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + cells[5].innerText + \"</td>\";\r\n\t\t\t\t\tcontent += \"<td>\" + cells[6].innerText + \"</td>\";\r\n\t\t\t\t\tcontent += \"</tr>\";\r\n\t\t\t\t});\r\n\r\n\t\t\t\tcontent += \"</tbody></table>\";\r\n\t\t\t\tcontent += \"<script>window.onload = function() { window.print(); window.close(); }<\\/script>\";\r\n\t\t\t\tcontent += \"</body></html>\";\r\n\r\n\t\t\t\tprintWindow.document.write(content);\r\n\t\t\t\tprintWindow.document.close();\r\n\t\t\t}\r\n\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -89,173 +102,173 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(results) > 0 {
 			for _, group := range results {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"result-card bg-white mb-8 rounded-xl shadow-sm border border-gray-200 overflow-hidden\"><div class=\"bg-gray-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center\"><h2 class=\"text-xl font-bold text-gray-700\" data-basepart=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(group.BasePart)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 122, Col: 79}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" data-description=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"result-card bg-white mb-8 rounded-xl shadow-sm border border-gray-200 overflow-hidden\"><div class=\"bg-gray-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center\"><h2 class=\"text-xl font-bold text-gray-700\" data-basepart=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(group.Description)
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(group.BasePart)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 122, Col: 118}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 123, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" data-description=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(group.BasePart)
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(group.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 123, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 123, Col: 118}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " <span class=\"ml-2 font-normal text-gray-500 text-lg\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(group.Description)
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(group.BasePart)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 123, Col: 97}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 124, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span></h2></div><div class=\"overflow-x-auto\"><table class=\"w-full text-left border-collapse\"><thead class=\"bg-gray-50 text-[10px] uppercase tracking-wider text-gray-500 font-bold\"><tr><th class=\"px-6 py-3 w-10 text-center\"></th><th class=\"px-6 py-3\">Model / Series</th><th class=\"px-6 py-3\">Catalog Rev</th><th class=\"px-6 py-3\">Figure</th><th class=\"px-6 py-3\">Key No</th><th class=\"px-6 py-3\">Full Part Number</th><th class=\"px-6 py-3\">Remarks</th></tr></thead> <tbody class=\"divide-y divide-gray-100\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " <span class=\"ml-2 font-normal text-gray-500 text-lg\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(group.Description)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 124, Col: 97}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span></h2></div><div class=\"overflow-x-auto\"><table class=\"w-full text-left border-collapse\"><thead class=\"bg-gray-50 text-[10px] uppercase tracking-wider text-gray-500 font-bold\"><tr><th class=\"px-6 py-3 w-10 text-center\"></th><th class=\"px-6 py-3\">Model / Series</th><th class=\"px-6 py-3\">Catalog Rev</th><th class=\"px-6 py-3\">Figure</th><th class=\"px-6 py-3\">Key No</th><th class=\"px-6 py-3\">Full Part Number</th><th class=\"px-6 py-3\">Remarks</th></tr></thead> <tbody class=\"divide-y divide-gray-100\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, occ := range group.Occurrences {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<tr class=\"hover:bg-gray-50 transition-colors\"><td class=\"px-6 py-4 text-center\"><input type=\"checkbox\" class=\"part-checkbox w-4 h-4 text-blue-600 rounded focus:ring-blue-500\" onchange=\"toggleRowHighlight(this)\"></td><td class=\"px-6 py-4 font-bold\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var9 string
-					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(occ.ModelSeries)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 145, Col: 58}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</td><td class=\"px-6 py-4\"><span class=\"bg-gray-500 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase\">Rev ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<tr class=\"hover:bg-gray-50 transition-colors\"><td class=\"px-6 py-4 text-center\"><input type=\"checkbox\" class=\"part-checkbox w-4 h-4 text-blue-600 rounded focus:ring-blue-500\" onchange=\"toggleRowHighlight(this)\"></td><td class=\"px-6 py-4 font-bold\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var10 string
-					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(occ.ManualRevision)
+					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(occ.ModelSeries)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 148, Col: 35}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 146, Col: 58}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span></td><td class=\"px-6 py-4 text-gray-600 font-mono text-sm\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</td><td class=\"px-6 py-4\"><span class=\"bg-gray-500 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase\">Rev ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var11 string
-					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(occ.FigureID)
+					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(occ.ManualRevision)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 151, Col: 77}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 149, Col: 35}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</td><td class=\"px-6 py-4 text-gray-600 font-mono text-sm\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span></td><td class=\"px-6 py-4 text-gray-600 font-mono text-sm\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var12 string
-					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(occ.KeyNo)
+					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(occ.FigureID)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 152, Col: 74}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 152, Col: 77}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</td><td class=\"px-6 py-4 font-mono text-sm\"><code>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</td><td class=\"px-6 py-4 text-gray-600 font-mono text-sm\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var13 string
-					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(occ.FullPartNumber)
+					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(occ.KeyNo)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 153, Col: 75}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 153, Col: 74}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</code></td><td class=\"px-6 py-4 text-gray-600 text-sm italic\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</td><td class=\"px-6 py-4 font-mono text-sm\"><code>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var14 string
-					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(occ.Remarks)
+					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(occ.FullPartNumber)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 154, Col: 73}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 154, Col: 75}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</td></tr>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</code></td><td class=\"px-6 py-4 text-gray-600 text-sm italic\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var15 string
+					templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(occ.Remarks)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 155, Col: 73}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</td></tr>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</tbody></table></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</tbody></table></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		} else if query != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"text-center py-20 bg-white rounded-xl border border-dashed border-gray-300\"><p class=\"text-gray-500 text-xl font-medium\">No parts found matching \"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"text-center py-20 bg-white rounded-xl border border-dashed border-gray-300\"><p class=\"text-gray-500 text-xl font-medium\">No parts found matching \"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(query)
+			var templ_7745c5c3_Var16 string
+			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(query)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 164, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 165, Col: 80}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\"</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
