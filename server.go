@@ -41,6 +41,7 @@ func main() {
 
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/search", handleSearch)
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 
 	fmt.Println("Server starting at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -162,6 +163,7 @@ const htmlTemplate = `
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
         .header { text-align: center; margin-bottom: 40px; }
+        .logo { max-width: 400px; height: auto; margin-bottom: 20px; }
         .search-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
         input[type="text"] { width: 70%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
         button { padding: 12px 24px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
@@ -180,8 +182,7 @@ const htmlTemplate = `
 </head>
 <body>
     <div class="header">
-        <h1>Bow</h1>
-        <p>Canon Copier Parts Cross-Reference Tool</p>
+        <a href="/"><img src="/assets/logo.png" alt="Bow Logo" class="logo"></a>
     </div>
 
     <div class="search-box">
