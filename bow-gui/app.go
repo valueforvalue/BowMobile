@@ -126,7 +126,7 @@ func (a *App) GetDBInfo() string {
 	return fmt.Sprintf("%s | Parts: %d | Size: %d KB", lastUpdated, count, sizeKB)
 }
 
-func (a *App) performSmartSearch(q string) []GroupedResult {
+func (a *App) performSmartSearch(q string) []bow.GroupedResult {
 	if q == "" || a.db == nil {
 		return nil
 	}
@@ -165,21 +165,21 @@ func (a *App) performSmartSearch(q string) []GroupedResult {
 	defer rows.Close()
 
 	var baseParts []string
-	groups := make(map[string]*GroupedResult)
+	groups := make(map[string]*bow.GroupedResult)
 
 	for rows.Next() {
 		var base, desc, model, mRev, fig, key, full, pRev, remarks string
 		rows.Scan(&base, &desc, &model, &mRev, &fig, &key, &full, &pRev, &remarks)
 
 		if _, ok := groups[base]; !ok {
-			groups[base] = &GroupedResult{
+			groups[base] = &bow.GroupedResult{
 				BasePart:    base,
 				Description: desc,
 			}
 			baseParts = append(baseParts, base)
 		}
 
-		groups[base].Occurrences = append(groups[base].Occurrences, PartOccurrence{
+		groups[base].Occurrences = append(groups[base].Occurrences, bow.PartOccurrence{
 			ModelSeries:    model,
 			ManualRevision: mRev,
 			FigureID:       fig,
@@ -191,7 +191,7 @@ func (a *App) performSmartSearch(q string) []GroupedResult {
 		})
 	}
 
-	final := make([]GroupedResult, 0, len(baseParts))
+	final := make([]bow.GroupedResult, 0, len(baseParts))
 	for _, b := range baseParts {
 		final = append(final, *groups[b])
 	}

@@ -1,6 +1,8 @@
 package main
 
-templ Results(results []GroupedResult, query string) {
+import "bow"
+
+templ Results(results []bow.GroupedResult, query string) {
 	if len(results) > 0 {
 		for _, group := range results {
 			<div class="result-card bg-white mb-8 rounded-xl shadow-sm border border-gray-200 overflow-hidden">

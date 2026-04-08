@@ -11,7 +11,6 @@ if (Test-Path bow-gui/build/bin) { Remove-Item -Path bow-gui/build/bin/* -Recurs
 # 1. Generate Templates
 Write-Host "Step 1: Generating Templ components..."
 templ generate ./bow-gui/
-templ generate ./cmd/server/
 
 # 2. Sync Data
 # (No longer syncing DB into source for embedding)
