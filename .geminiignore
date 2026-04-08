@@ -1,0 +1,20 @@
+# Gemini Ignore Patterns
+
+# Binaries and build artifacts
+*.exe
+*.zip
+bow-gui/build/bin/
+
+# Database files (often too large or binary)
+parts.db
+parts.db-journal
+
+# Node modules
+node_modules/
+bow-gui/frontend/node_modules/
+
+# Generated code
+*_templ.go
+
+# Temp files
+Parts/temp_decrypted.pdf

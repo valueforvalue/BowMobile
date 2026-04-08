@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -130,39 +129,31 @@ func performSmartSearch(q string) []bow.GroupedResult {
 		return nil
 	}
 	q = strings.ToUpper(strings.TrimSpace(q))
+
+	// Search term for fields that might have hyphens
+	likeQ := "%" + q + "%"
+
+	// Normalized search term for fields where we strip hyphens
+	normalizedQ := strings.ReplaceAll(q, "-", "")
+	likeNormalizedQ := "%" + normalizedQ + "%"
 	
-	// Normalize part number: remove spaces and hyphens for matching
-	normalized := strings.ReplaceAll(q, "-", "")
-	normalized = strings.ReplaceAll(normalized, " ", "")
-
-	var sqlQuery string
-	var args []interface{}
-
-	// If it looks like a part number (starts with letter/digit, has certain length)
-	isPartNumber := regexp.MustCompile(`^[A-Z0-9]{3,15}$`).MatchString(normalized)
-
-	if isPartNumber {
-		sqlQuery = `
-			SELECT p.base_part, p.description, m.model_series, m.revision, p.figure_id, p.key_no, p.part_number, p.revision, p.remarks
-			FROM parts p
-			JOIN manuals m ON p.manual_id = m.id
-			WHERE REPLACE(p.part_number, '-', '') LIKE ? 
-			   OR REPLACE(p.base_part, '-', '') LIKE ?
-			   OR p.remarks LIKE ?
-			ORDER BY p.base_part, m.model_series
-		`
-		args = append(args, normalized+"%", normalized+"%", "%"+q+"%")
-	} else {
-		sqlQuery = `
-			SELECT p.base_part, p.description, m.model_series, m.revision, p.figure_id, p.key_no, p.part_number, p.revision, p.remarks
-			FROM parts p
-			JOIN manuals m ON p.manual_id = m.id
-			WHERE p.description LIKE ?
-			   OR p.remarks LIKE ?
-			ORDER BY p.base_part, m.model_series
-		`
-		args = append(args, "%"+q+"%", "%"+q+"%")
-	}
+	// This query is more explicit.
+	// It searches for the original query in part_number, description, and remarks.
+	// It also searches for the normalized query in the hyphen-stripped part_number.
+	// This covers all cases and is easier to debug.
+	sqlQuery := `
+		SELECT p.base_part, p.description, m.model_series, m.revision, p.figure_id, p.key_no, p.part_number, p.revision, p.remarks
+		FROM parts p
+		JOIN manuals m ON p.manual_id = m.id
+		WHERE p.part_number LIKE ? 
+		   OR REPLACE(p.part_number, '-', '') LIKE ?
+		   OR p.base_part LIKE ?
+		   OR REPLACE(p.base_part, '-', '') LIKE ?
+		   OR p.description LIKE ?
+		   OR p.remarks LIKE ?
+		ORDER BY p.base_part, m.model_series
+	`
+	args := []interface{}{likeQ, likeNormalizedQ, likeQ, likeNormalizedQ, likeQ, likeQ}
 
 	rows, err := db.Query(sqlQuery, args...)
 	if err != nil {
