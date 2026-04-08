@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	_ "modernc.org/sqlite"
@@ -94,18 +95,28 @@ func (a *App) GetModels() string {
 	return sb.String()
 }
 
-// GetDBInfo returns the last updated date of the database
+// GetDBInfo returns the last updated date, total parts, and size of the database
 func (a *App) GetDBInfo() string {
 	if a.db == nil {
-		return "Unknown"
+		return "Database not connected"
 	}
 
 	var lastUpdated string
-	err := a.db.QueryRow("SELECT last_updated FROM metadata WHERE id = 1").Scan(&lastUpdated)
-	if err != nil {
-		return "Unknown"
+	_ = a.db.QueryRow("SELECT last_updated FROM metadata WHERE id = 1").Scan(&lastUpdated)
+	if lastUpdated == "" {
+		lastUpdated = "Unknown"
 	}
-	return lastUpdated
+
+	var count int
+	_ = a.db.QueryRow("SELECT count(*) FROM parts").Scan(&count)
+
+	var sizeKB int64
+	info, err := os.Stat("parts.db")
+	if err == nil {
+		sizeKB = info.Size() / 1024
+	}
+
+	return fmt.Sprintf("%s | Parts: %d | Size: %d KB", lastUpdated, count, sizeKB)
 }
 
 func (a *App) performSmartSearch(q string) []GroupedResult {

@@ -199,13 +199,23 @@ func performSmartSearch(q string) []bow.GroupedResult {
 
 func getDBInfo() string {
 	if db == nil {
-		return "Unknown"
+		return "Database not connected"
 	}
 
 	var lastUpdated string
-	err := db.QueryRow("SELECT last_updated FROM metadata WHERE id = 1").Scan(&lastUpdated)
-	if err != nil {
-		return "Unknown"
+	_ = db.QueryRow("SELECT last_updated FROM metadata WHERE id = 1").Scan(&lastUpdated)
+	if lastUpdated == "" {
+		lastUpdated = "Unknown"
 	}
-	return lastUpdated
+
+	var count int
+	_ = db.QueryRow("SELECT count(*) FROM parts").Scan(&count)
+
+	var sizeKB int64
+	info, err := os.Stat("parts.db")
+	if err == nil {
+		sizeKB = info.Size() / 1024
+	}
+
+	return fmt.Sprintf("%s | Parts: %d | Size: %d KB", lastUpdated, count, sizeKB)
 }
