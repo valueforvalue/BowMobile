@@ -30,3 +30,7 @@ Parts/*.pdf
 # OS files
 .DS_Store
 Thumbs.db
+
+# Flutter release artifacts (built locally, not committed)
+app-release.apk
+app-debug.apk
