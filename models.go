@@ -1,6 +1,6 @@
 package bow
 
-const Version = "1.0.0"
+const Version = "1.1.3"
 
 type Part struct {
 	KeyNo       string
