@@ -5,11 +5,23 @@ Write-Host "--- Starting Release Build ---" -ForegroundColor Cyan
 # 1. Generate Templates
 Write-Host "Step 1: Generating Templ components..."
 templ generate ./bow-gui/
+templ generate ./cmd/server/
 
 # 2. Sync Data
 # (No longer syncing DB into source for embedding)
 if (-Not (Test-Path bow-gui/frontend/assets)) { mkdir bow-gui/frontend/assets }
 cp assets/* bow-gui/frontend/assets/
+
+# 2b. Verify Search Logic
+Write-Host "Step 2b: Verifying search logic..."
+cd cmd/tools
+go run verify_search.go
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Verification FAILED. Aborting build." -ForegroundColor Red
+    cd ../..
+    exit 1
+}
+cd ../..
 
 # 3. Build Binary
 Write-Host "Step 3: Building Bow_v1.1.2.exe..."

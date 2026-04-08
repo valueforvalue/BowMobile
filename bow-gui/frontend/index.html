@@ -56,11 +56,21 @@
     </div>
 
     <script>
-        window.onload = function() {
-            window.go.main.App.GetDBInfo().then(result => {
-                document.getElementById('db-info').innerText = result;
-            });
-        };
+        function updateDBInfo() {
+            if (window.go && window.go.main && window.go.main.App) {
+                window.go.main.App.GetDBInfo().then(result => {
+                    document.getElementById('db-info').innerText = result;
+                }).catch(err => {
+                    document.getElementById('db-info').innerText = "Unknown";
+                });
+            } else {
+                // Retry in 100ms if bindings not ready
+                setTimeout(updateDBInfo, 100);
+            }
+        }
+
+        // Start checking for bindings
+        updateDBInfo();
 
         document.getElementById('search-form').onsubmit = function(e) {
             e.preventDefault();
