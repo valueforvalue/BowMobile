@@ -91,7 +91,12 @@ func openBrowser(url string) {
 	case "linux":
 		err = exec.Command("xdg-open", url).Start()
 	case "windows":
-		err = exec.Command("cmd", "/c", "start", url).Start()
+		// Try to open Chrome explicitly first
+		err = exec.Command("cmd", "/c", "start", "chrome", url).Start()
+		if err != nil {
+			// Fallback to default browser
+			err = exec.Command("cmd", "/c", "start", url).Start()
+		}
 	case "darwin":
 		err = exec.Command("open", url).Start()
 	default:
