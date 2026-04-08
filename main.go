@@ -20,6 +20,7 @@ type Part struct {
 	Revision    string
 	Qty         string
 	Description string
+	Remarks     string
 }
 
 type ManualInfo struct {
@@ -160,6 +161,7 @@ func processWithPDFToText(db *sql.DB, pdfPath string, manualID int64) {
 	anchorRegex := regexp.MustCompile(`([A-Z0-9]{3}-[A-Z0-9]{4})-([A-Z0-9]{3})`)
 	qtyRegex := regexp.MustCompile(`^(\d+)\s+(.*)$`)
 	keyNoRegex := regexp.MustCompile(`^\d{1,3}$`)
+	remSplitRegex := regexp.MustCompile(`^(.*?)\s{3,}(.*)$`)
 	
 	var currentFigureID string
 
@@ -203,10 +205,17 @@ func processWithPDFToText(db *sql.DB, pdfPath string, manualID int64) {
 		rightSide := strings.TrimSpace(line[loc[1]:])
 		qty := ""
 		description := rightSide
+		remarks := ""
 		
 		if qr := qtyRegex.FindStringSubmatch(rightSide); len(qr) > 2 {
 			qty = qr[1]
 			description = qr[2]
+		}
+
+		// Split Remarks (3+ spaces)
+		if remParts := remSplitRegex.FindStringSubmatch(description); len(remParts) > 2 {
+			description = remParts[1]
+			remarks = remParts[2]
 		}
 
 		// 4. Validation
@@ -220,6 +229,7 @@ func processWithPDFToText(db *sql.DB, pdfPath string, manualID int64) {
 			Revision:    revision,
 			Qty:         qty,
 			Description: description,
+			Remarks:     remarks,
 		})
 	}
 }
@@ -238,6 +248,7 @@ func initDB(db *sql.DB) error {
 		revision TEXT,
 		qty TEXT,
 		description TEXT,
+		remarks TEXT,
 		FOREIGN KEY(manual_id) REFERENCES manuals(id)
 	);
 	CREATE INDEX IF NOT EXISTS idx_base_part ON parts(base_part);
@@ -259,6 +270,6 @@ func saveManual(db *sql.DB, filename, model, rev string) (int64, error) {
 
 func savePart(db *sql.DB, manualID int64, figureID string, p Part) {
 	db.Exec("INSERT OR IGNORE INTO figures (manual_id, id) VALUES (?, ?)", manualID, figureID)
-	db.Exec("INSERT INTO parts (manual_id, figure_id, key_no, part_number, base_part, revision, qty, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-		manualID, figureID, p.KeyNo, p.BasePart + "-" + p.Revision, p.BasePart, p.Revision, p.Qty, p.Description)
+	db.Exec("INSERT INTO parts (manual_id, figure_id, key_no, part_number, base_part, revision, qty, description, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		manualID, figureID, p.KeyNo, p.BasePart + "-" + p.Revision, p.BasePart, p.Revision, p.Qty, p.Description, p.Remarks)
 }
