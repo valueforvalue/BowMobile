@@ -8,6 +8,13 @@ test_page
 test_range
 extract_text
 
+# Templ
+*_templ.go
+
+# Release Assets (embedded during build)
+cmd/server/parts.db
+cmd/server/assets/
+
 # Database
 parts.db
 parts.db-journal
