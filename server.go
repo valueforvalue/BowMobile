@@ -20,6 +20,7 @@ type PartOccurrence struct {
 	FullPartNumber  string
 	Revision        string
 	Description     string
+	Remarks         string
 }
 
 type GroupedResult struct {
@@ -79,27 +80,29 @@ func performSmartSearch(q string) []GroupedResult {
 	isPartNumber := regexp.MustCompile(`^[A-Z0-9]{3,15}$`).MatchString(normalized)
 
 	if isPartNumber {
-		// Match against base_part or full part_number (normalized)
+		// Match against base_part or full part_number (normalized) or remarks
 		// We'll use a LIKE match but try to be smart
 		sqlQuery = `
-			SELECT p.base_part, p.description, m.model_series, m.revision, p.figure_id, p.key_no, p.part_number, p.revision
+			SELECT p.base_part, p.description, m.model_series, m.revision, p.figure_id, p.key_no, p.part_number, p.revision, p.remarks
 			FROM parts p
 			JOIN manuals m ON p.manual_id = m.id
 			WHERE REPLACE(p.part_number, '-', '') LIKE ? 
 			   OR REPLACE(p.base_part, '-', '') LIKE ?
+			   OR p.remarks LIKE ?
 			ORDER BY p.base_part, m.model_series
 		`
-		args = append(args, normalized+"%", normalized+"%")
+		args = append(args, normalized+"%", normalized+"%", "%"+q+"%")
 	} else {
-		// Keyword search in description
+		// Keyword search in description or remarks
 		sqlQuery = `
-			SELECT p.base_part, p.description, m.model_series, m.revision, p.figure_id, p.key_no, p.part_number, p.revision
+			SELECT p.base_part, p.description, m.model_series, m.revision, p.figure_id, p.key_no, p.part_number, p.revision, p.remarks
 			FROM parts p
 			JOIN manuals m ON p.manual_id = m.id
 			WHERE p.description LIKE ?
+			   OR p.remarks LIKE ?
 			ORDER BY p.base_part, m.model_series
 		`
-		args = append(args, "%"+q+"%")
+		args = append(args, "%"+q+"%", "%"+q+"%")
 	}
 
 	rows, err := db.Query(sqlQuery, args...)
@@ -113,8 +116,8 @@ func performSmartSearch(q string) []GroupedResult {
 	var baseParts []string // To maintain order
 
 	for rows.Next() {
-		var base, desc, model, mRev, fig, key, full, pRev string
-		rows.Scan(&base, &desc, &model, &mRev, &fig, &key, &full, &pRev)
+		var base, desc, model, mRev, fig, key, full, pRev, remarks string
+		rows.Scan(&base, &desc, &model, &mRev, &fig, &key, &full, &pRev, &remarks)
 
 		if _, ok := groups[base]; !ok {
 			groups[base] = &GroupedResult{
@@ -132,6 +135,7 @@ func performSmartSearch(q string) []GroupedResult {
 			FullPartNumber: full,
 			Revision:       pRev,
 			Description:    desc,
+			Remarks:        remarks,
 		})
 	}
 
@@ -207,6 +211,7 @@ const htmlTemplate = `
                                 <th>Figure</th>
                                 <th>Key No</th>
                                 <th>Full Part Number</th>
+                                <th>Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -217,6 +222,7 @@ const htmlTemplate = `
                                     <td>{{.FigureID}}</td>
                                     <td>{{.KeyNo}}</td>
                                     <td><code>{{.FullPartNumber}}</code></td>
+                                    <td>{{.Remarks}}</td>
                                 </tr>
                             {{end}}
                         </tbody>
