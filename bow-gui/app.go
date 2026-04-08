@@ -27,7 +27,7 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	
-	// Open database
+	// Open database (Look for it in the same directory as the EXE)
 	var err error
 	a.db, err = sql.Open("sqlite", "file:parts.db?mode=ro&_journal_mode=WAL")
 	if err != nil {

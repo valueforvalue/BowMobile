@@ -4,23 +4,24 @@ Write-Host "--- Starting Release Build ---" -ForegroundColor Cyan
 
 # 1. Generate Templates
 Write-Host "Step 1: Generating Templ components..."
-templ generate ./cmd/server/
+templ generate ./bow-gui/
 
-# 2. Sync Data for Embedding
-Write-Host "Step 2: Syncing data for embedding..."
-cp parts.db cmd/server/
-if (-Not (Test-Path cmd/server/assets)) { mkdir cmd/server/assets }
-cp assets/* cmd/server/assets/
+# 2. Sync Data
+# (No longer syncing DB into source for embedding)
+if (-Not (Test-Path bow-gui/frontend/assets)) { mkdir bow-gui/frontend/assets }
+cp assets/* bow-gui/frontend/assets/
 
 # 3. Build Binary
-# -ldflags="-H windowsgui" hides the console window on launch
-Write-Host "Step 3: Building Bow.exe..."
-go build -o Bow.exe -ldflags="-s -w -H windowsgui" ./cmd/server/
+Write-Host "Step 3: Building Bow_v1.1.1.exe..."
+cd bow-gui
+& "C:\Users\value\go\bin\wails.exe" build -o Bow_v1.1.1.exe -ldflags "-H windowsgui"
+mv build/bin/Bow_v1.1.1.exe ../
+cd ..
 
 # 4. Package into Zip
-Write-Host "Step 4: Packaging into Zip..."
-if (Test-Path Bow_Release.zip) { Remove-Item Bow_Release.zip }
-Compress-Archive -Path Bow.exe -DestinationPath Bow_Release.zip
+Write-Host "Step 4: Packaging into Zip (EXE + Database)..."
+if (Test-Path Bow_v1.1.1_Release.zip) { Remove-Item Bow_v1.1.1_Release.zip }
+Compress-Archive -Path Bow_v1.1.1.exe, parts.db -DestinationPath Bow_v1.1.1_Release.zip
 
-Write-Host "--- Build Complete: Bow.exe and Bow_Release.zip created ---" -ForegroundColor Green
-Write-Host "Note: When you run Bow.exe, it will extract 'parts.db' to the current folder if it doesn't exist." -ForegroundColor Yellow
+Write-Host "--- Build Complete: Bow_v1.1.1.exe and Bow_v1.1.1_Release.zip created ---" -ForegroundColor Green
+Write-Host "Note: This version requires 'parts.db' to be in the same folder as the EXE." -ForegroundColor Yellow
