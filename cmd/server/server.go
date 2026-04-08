@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -18,16 +20,20 @@ var db *sql.DB
 func main() {
 	var err error
 	// Open with read-only and shared cache mode for better concurrency
-	// Note: parts.db is in the parent root directory
-	db, err = sql.Open("sqlite", "file:../../parts.db?mode=ro&_journal_mode=WAL")
+	db, err = sql.Open("sqlite", "file:parts.db?mode=ro&_journal_mode=WAL")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
+	cwd, _ := os.Getwd()
+	fmt.Printf("Current Working Directory: %s\n", cwd)
+	assetPath := filepath.Join(cwd, "assets")
+	fmt.Printf("Serving assets from: %s\n", assetPath)
+
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/search", handleSearch)
-	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../../assets"))))
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 
 	fmt.Println("Server starting at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))

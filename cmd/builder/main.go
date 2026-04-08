@@ -18,7 +18,7 @@ import (
 
 func main() {
 	// Reaching up to parent directory for parts.db
-	db, err := sql.Open("sqlite", "../../parts.db")
+	db, err := sql.Open("sqlite", "parts.db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func main() {
 		filesToProcess = append(filesToProcess, os.Args[1])
 	} else {
 		// Folder mode - look in parent Parts directory
-		entries, err := os.ReadDir("../../Parts")
+		entries, err := os.ReadDir("Parts")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -44,7 +44,7 @@ func main() {
 			if strings.HasSuffix(strings.ToLower(fname), ".pdf") &&
 				fname != "decrypted.pdf" &&
 				fname != "temp_decrypted.pdf" {
-				filesToProcess = append(filesToProcess, filepath.Join("../../Parts", fname))
+				filesToProcess = append(filesToProcess, filepath.Join("Parts", fname))
 			}
 		}
 	}
@@ -64,7 +64,7 @@ func main() {
 		manualStart := time.Now()
 		fmt.Printf("\n--- Starting: %s ---\n", fname)
 
-		tempPath := filepath.Join("../../Parts", "temp_decrypted.pdf")
+		tempPath := filepath.Join("Parts", "temp_decrypted.pdf")
 		os.Remove(tempPath)
 
 		qpdfPath := `C:\Program Files\qpdf 12.3.2\bin\qpdf.exe`
