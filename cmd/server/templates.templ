@@ -17,6 +17,7 @@ templ Layout(query string, results []bow.GroupedResult) {
 		</style>
 	</head>
 	<body class="min-h-screen p-4 md:p-8 text-gray-800">
+		<div hx-get="/pulse" hx-trigger="every 10s" class="hidden"></div>
 		<div class="max-w-6xl mx-auto">
 			<!-- Header -->
 			<div class="text-center mb-10">
@@ -32,7 +33,7 @@ templ Layout(query string, results []bow.GroupedResult) {
 						type="text" 
 						name="q" 
 						value={ query } 
-						placeholder="Search by part number (e.g. FE3-1525) or description (e.g. Roller)..." 
+						placeholder="Search by part number (e.g. FM2-A087-020) or description (e.g. Roller)..." 
 						class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg"
 						autofocus
 					>

@@ -26,6 +26,7 @@ var embeddedAssets embed.FS
 var embeddedDB []byte
 
 var db *sql.DB
+var lastPulse = time.Now()
 
 func main() {
 	// 1. Ensure database exists on disk (SQLite needs a physical file)
@@ -49,6 +50,7 @@ func main() {
 	// 3. Setup Routes
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/search", handleSearch)
+	http.HandleFunc("/pulse", handlePulse)
 
 	// Serve embedded assets
 	assetSub, _ := fs.Sub(embeddedAssets, "assets")
@@ -58,6 +60,17 @@ func main() {
 	url := "http://localhost:8080"
 	fmt.Printf("Bow Server starting at %s\n", url)
 	
+	// Shutdown watcher: If no pulse for 30 seconds, exit.
+	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+			if time.Since(lastPulse) > 30*time.Second {
+				fmt.Println("No browser activity detected for 30s. Shutting down...")
+				os.Exit(0)
+			}
+		}
+	}()
+
 	go func() {
 		// Wait a second for server to initialize
 		time.Sleep(1 * time.Second)
@@ -65,6 +78,11 @@ func main() {
 	}()
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func handlePulse(w http.ResponseWriter, r *http.Request) {
+	lastPulse = time.Now()
+	w.WriteHeader(http.StatusOK)
 }
 
 func openBrowser(url string) {
