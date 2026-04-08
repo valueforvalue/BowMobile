@@ -8,7 +8,6 @@ package main
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "fmt"
 import "bow"
 
 func Layout(query string, results []bow.GroupedResult) templ.Component {
@@ -39,7 +38,7 @@ func Layout(query string, results []bow.GroupedResult) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(query)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 35, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 34, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -91,7 +90,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(group.BasePart)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 116, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 115, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -104,7 +103,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(group.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 116, Col: 118}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 115, Col: 118}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -117,7 +116,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(group.BasePart)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 117, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 116, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -130,7 +129,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(group.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 117, Col: 97}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 116, Col: 97}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -148,7 +147,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(occ.ModelSeries)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 139, Col: 58}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 138, Col: 58}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -161,7 +160,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(occ.ManualRevision)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 142, Col: 35}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 141, Col: 35}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
@@ -174,7 +173,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 					var templ_7745c5c3_Var10 string
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(occ.FigureID)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 145, Col: 77}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 144, Col: 77}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
@@ -187,7 +186,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(occ.KeyNo)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 146, Col: 74}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 145, Col: 74}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
@@ -200,7 +199,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(occ.FullPartNumber)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 147, Col: 75}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 146, Col: 75}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -213,7 +212,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(occ.Remarks)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 148, Col: 73}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 147, Col: 73}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -237,7 +236,7 @@ func Results(results []bow.GroupedResult, query string) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(query)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 158, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/server/templates.templ`, Line: 157, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
