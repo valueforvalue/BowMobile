@@ -2,6 +2,12 @@
 
 Write-Host "--- Starting Release Build ---" -ForegroundColor Cyan
 
+# 0. Deep Clean
+Write-Host "Step 0: Cleaning old build artifacts..."
+Remove-Item -Path *.exe -ErrorAction SilentlyContinue
+Remove-Item -Path *.zip -ErrorAction SilentlyContinue
+if (Test-Path bow-gui/build/bin) { Remove-Item -Path bow-gui/build/bin/* -Recurse -Force -ErrorAction SilentlyContinue }
+
 # 1. Generate Templates
 Write-Host "Step 1: Generating Templ components..."
 templ generate ./bow-gui/
@@ -24,16 +30,16 @@ if ($LASTEXITCODE -ne 0) {
 cd ../..
 
 # 3. Build Binary
-Write-Host "Step 3: Building Bow_v1.1.2.exe..."
+Write-Host "Step 3: Building Bow_v1.1.3.exe..."
 cd bow-gui
-wails build -o Bow_v1.1.2.exe -ldflags "-H windowsgui"
-mv build/bin/Bow_v1.1.2.exe ../
+wails build -o Bow_v1.1.3.exe -ldflags "-H windowsgui"
+mv build/bin/Bow_v1.1.3.exe ../
 cd ..
 
 # 4. Package into Zip
 Write-Host "Step 4: Packaging into Zip (EXE + Database)..."
-if (Test-Path Bow_v1.1.2_Release.zip) { Remove-Item Bow_v1.1.2_Release.zip }
-Compress-Archive -Path Bow_v1.1.2.exe, parts.db -DestinationPath Bow_v1.1.2_Release.zip
+if (Test-Path Bow_v1.1.3_Release.zip) { Remove-Item Bow_v1.1.3_Release.zip }
+Compress-Archive -Path Bow_v1.1.3.exe, parts.db -DestinationPath Bow_v1.1.3_Release.zip
 
-Write-Host "--- Build Complete: Bow_v1.1.2.exe and Bow_v1.1.2_Release.zip created ---" -ForegroundColor Green
+Write-Host "--- Build Complete: Bow_v1.1.3.exe and Bow_v1.1.3_Release.zip created ---" -ForegroundColor Green
 Write-Host "Note: This version requires 'parts.db' to be in the same folder as the EXE." -ForegroundColor Yellow

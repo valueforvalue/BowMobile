@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"bow"
 	_ "modernc.org/sqlite"
 )
 
@@ -32,6 +33,12 @@ func (a *App) startup(ctx context.Context) {
 	a.db, err = sql.Open("sqlite", "file:parts.db?mode=ro&_journal_mode=WAL")
 	if err != nil {
 		log.Printf("Failed to open database: %v", err)
+	}
+
+	// Ensure schema is up to date
+	_, err = a.db.Exec(bow.Schema)
+	if err != nil {
+		log.Printf("Failed to initialize database schema: %v", err)
 	}
 }
 

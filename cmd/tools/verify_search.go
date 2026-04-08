@@ -103,6 +103,28 @@ func main() {
 	}
 	defer db.Close()
 
+	failed := false
+
+	// 1. Verify Schema Integrity
+	fmt.Printf("Verifying database schema... ")
+	var schema string
+	err = db.QueryRow("SELECT sql FROM sqlite_master WHERE type='table' AND name='parts'").Scan(&schema)
+	if err != nil {
+		fmt.Printf("FAIL (Could not read parts table schema: %v)\n", err)
+		failed = true
+	} else if !strings.Contains(strings.ToLower(schema), "remarks") {
+		fmt.Printf("FAIL (Table 'parts' is missing 'remarks' column)\n")
+		failed = true
+	} else {
+		fmt.Printf("PASS\n")
+	}
+
+	if failed {
+		fmt.Println("\nResult: DATABASE INTEGRITY CHECK FAILED")
+		os.Exit(1)
+	}
+
+	// 2. Verify Search Logic
 	testCases := []struct {
 		query       string
 		minResults  int
@@ -114,11 +136,10 @@ func main() {
 		{"Roller", 5, "ROLLER"},
 	}
 
-	failed := false
 	for _, tc := range testCases {
 		fmt.Printf("Testing query: '%s'... ", tc.query)
 		results := performSmartSearch(db, tc.query)
-		
+
 		count := len(results)
 		foundMatch := false
 		for _, r := range results {

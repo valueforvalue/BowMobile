@@ -1,6 +1,6 @@
 package main
 
-const Version = "1.1.2"
+const Version = "1.1.3"
 
 type Part struct {
 	KeyNo       string

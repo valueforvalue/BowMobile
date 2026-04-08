@@ -1,12 +1,15 @@
 module native-gui
 
-go 1.25.0
+go 1.26.1
 
 require (
+	bow v0.0.0-00010101000000-000000000000
 	github.com/a-h/templ v0.3.1001
 	github.com/wailsapp/wails/v2 v2.12.0
 	modernc.org/sqlite v1.48.1
 )
+
+replace bow => ../
 
 require (
 	git.sr.ht/~jackmordaunt/go-toast/v2 v2.0.3 // indirect
