@@ -1,0 +1,161 @@
+package main
+
+import "fmt"
+import "bow"
+
+templ Layout(query string, results []bow.GroupedResult) {
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Bow - Parts Cross-Reference</title>
+		<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<style>
+			body { background-color: #f8f9fa; }
+			.row-selected { background-color: #fef9c3 !important; }
+		</style>
+	</head>
+	<body class="min-h-screen p-4 md:p-8 text-gray-800">
+		<div class="max-w-6xl mx-auto">
+			<!-- Header -->
+			<div class="text-center mb-10">
+				<a href="/">
+					<img src="/assets/logo.png" alt="Bow Logo" class="mx-auto max-w-[280px] h-auto border border-gray-200 rounded-lg shadow-sm">
+				</a>
+			</div>
+
+			<!-- Search Box -->
+			<div class="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-100">
+				<form hx-get="/search" hx-target="#results-container" hx-push-url="true" class="flex flex-col md:flex-row gap-4">
+					<input 
+						type="text" 
+						name="q" 
+						value={ query } 
+						placeholder="Search by part number (e.g. FE3-1525) or description (e.g. Roller)..." 
+						class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg"
+						autofocus
+					>
+					<div class="flex gap-2">
+						<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg shadow-sm">
+							Search
+						</button>
+						<button type="button" onclick="printSelected()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg shadow-sm">
+							Print Selected
+						</button>
+					</div>
+				</form>
+			</div>
+
+			<!-- Results Area -->
+			<div id="results-container">
+				@Results(results, query)
+			</div>
+		</div>
+
+		<script>
+			function toggleRowHighlight(checkbox) {
+				const row = checkbox.closest('tr');
+				if (checkbox.checked) {
+					row.classList.add('row-selected');
+				} else {
+					row.classList.remove('row-selected');
+				}
+			}
+
+			function printSelected() {
+				const selectedRows = document.querySelectorAll('.part-checkbox:checked');
+				if (selectedRows.length === 0) {
+					alert('Please select at least one part to print.');
+					return;
+				}
+
+				const printWindow = window.open('', '_blank');
+				let content = "<html><head><title>Parts List Selection</title>";
+				content += "<style>body { font-family: sans-serif; padding: 40px; } h1 { text-align: center; color: #333; } table { width: 100%; border-collapse: collapse; margin-top: 20px; } th, td { border: 1px solid #ddd; padding: 12px; text-align: left; } th { background-color: #f2f2f2; }</style>";
+				content += "</head><body><h1>Selected Parts List</h1><table><thead><tr><th>Base Part</th><th>Description</th><th>Model / Series</th><th>Figure</th><th>Key No</th><th>Full Part Number</th><th>Remarks</th></tr></thead><tbody>";
+
+				selectedRows.forEach(cb => {
+					const row = cb.closest('tr');
+					const card = row.closest('.result-card');
+					const header = card.querySelector('h2');
+					
+					const basePart = header.getAttribute('data-basepart');
+					const description = header.getAttribute('data-description');
+					
+					const cells = row.querySelectorAll('td');
+					content += "<tr>";
+					content += "<td>" + basePart + "</td>";
+					content += "<td>" + description + "</td>";
+					content += "<td>" + cells[1].innerText + "</td>";
+					content += "<td>" + cells[3].innerText + "</td>";
+					content += "<td>" + cells[4].innerText + "</td>";
+					content += "<td>" + cells[5].innerText + "</td>";
+					content += "<td>" + cells[6].innerText + "</td>";
+					content += "</tr>";
+				});
+
+				content += "</tbody></table>";
+				content += "<script>window.onload = function() { window.print(); window.close(); }<\/script>";
+				content += "</body></html>";
+
+				printWindow.document.write(content);
+				printWindow.document.close();
+			}
+		</script>
+	</body>
+	</html>
+}
+
+templ Results(results []bow.GroupedResult, query string) {
+	if len(results) > 0 {
+		for _, group := range results {
+			<div class="result-card bg-white mb-8 rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+				<div class="bg-gray-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+					<h2 class="text-xl font-bold text-gray-700" data-basepart={ group.BasePart } data-description={ group.Description }>
+						{ group.BasePart } <span class="ml-2 font-normal text-gray-500 text-lg">{ group.Description }</span>
+					</h2>
+				</div>
+				<div class="overflow-x-auto">
+					<table class="w-full text-left border-collapse">
+						<thead class="bg-gray-50 text-[10px] uppercase tracking-wider text-gray-500 font-bold">
+							<tr>
+								<th class="px-6 py-3 w-10 text-center"></th>
+								<th class="px-6 py-3">Model / Series</th>
+								<th class="px-6 py-3">Catalog Rev</th>
+								<th class="px-6 py-3">Figure</th>
+								<th class="px-6 py-3">Key No</th>
+								<th class="px-6 py-3">Full Part Number</th>
+								<th class="px-6 py-3">Remarks</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-gray-100">
+							for _, occ := range group.Occurrences {
+								<tr class="hover:bg-gray-50 transition-colors">
+									<td class="px-6 py-4 text-center">
+										<input type="checkbox" class="part-checkbox w-4 h-4 text-blue-600 rounded focus:ring-blue-500" onchange="toggleRowHighlight(this)">
+									</td>
+									<td class="px-6 py-4 font-bold">{ occ.ModelSeries }</td>
+									<td class="px-6 py-4">
+										<span class="bg-gray-500 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase">
+											Rev { occ.ManualRevision }
+										</span>
+									</td>
+									<td class="px-6 py-4 text-gray-600 font-mono text-sm">{ occ.FigureID }</td>
+									<td class="px-6 py-4 text-gray-600 font-mono text-sm">{ occ.KeyNo }</td>
+									<td class="px-6 py-4 font-mono text-sm"><code>{ occ.FullPartNumber }</code></td>
+									<td class="px-6 py-4 text-gray-600 text-sm italic">{ occ.Remarks }</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		}
+	} else if query != "" {
+		<div class="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+			<p class="text-gray-500 text-xl font-medium">No parts found matching "{ query }"</p>
+		</div>
+	}
+}
