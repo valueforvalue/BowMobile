@@ -11,6 +11,10 @@ extract_text
 # Templ
 *_templ.go
 
+# Wails
+bow-gui/frontend/dist/
+bow-gui/build/bin/
+
 # Release Assets (embedded during build)
 cmd/server/parts.db
 cmd/server/assets/
