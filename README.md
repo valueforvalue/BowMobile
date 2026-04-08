@@ -3,72 +3,65 @@
 CanonBow is a high-performance Go-based utility designed to ingest Canon Parts Catalog PDFs and build a searchable SQLite database. It specializes in "Smart Cross-Referencing," allowing technicians to see exactly which parts are shared across different copier series (imageRUNNER ADVANCE, imageFORCE, imagePRESS, etc.).
 
 ## 🚀 Project Achievements & Features
-- **High-Speed Parsing**: Optimized extraction using `pdftotext -table` mode, processing 70+ manuals in under 10 minutes.
-- **Smart Metadata Extraction**: Automatically detects Model Series and Catalog Revision from both filenames and PDF content.
-- **Robust Regex Logic**: Cleanly separates Key Numbers, Base Part Numbers, Revisions, and Descriptions, even when PDF text is tightly packed.
-- **Unified Cross-Referencing**: Databases are structured by "Base Part Number" (first 8 chars), ignoring revision numbers to find compatibility across models.
-- **Web Interface**: A standalone `localhost:8080` server with grouping logic to show all model occurrences for any searched part.
-- **Safe Concurrency**: The web server uses SQLite Read-Only (RO) mode with WAL journaling to prevent database locks while the builder is running.
+- **High-Speed Parsing**: Optimized extraction using a multi-step pipeline (Noise Filter -> Anchor Search -> Field Extraction -> Validation).
+- **Modern Web Stack**: Migrated to **Go + Templ + HTMX + Tailwind CSS** for a fast, "live" search experience.
+- **Smart Remarks Extraction**: Automatically captures schematic locations and connectors (e.g., **SL1, PS64, J705**) from manuals.
+- **Print Selection**: Select specific part occurrences and generate a clean, formatted parts list for printing.
+- **Incremental Builds**: The builder automatically skips manuals already in the database, making updates near-instant.
+- **Portable Release**: Single-file **`Bow.exe`** with embedded database, auto-browser launch, and auto-shutdown heartbeat.
 
 ---
 
 ## 🛠 Prerequisites & Tools
-To run or develop this project on a new machine, ensure the following are installed:
+To develop this project or rebuild from source, ensure the following are installed:
 
-### 1. Go (Golang)
-- **Version**: 1.21 or higher.
-- **Install**: [go.dev/dl](https://go.dev/dl/)
+### 1. Go (Golang) & Templ
+- **Go**: v1.21 or higher. [go.dev/dl](https://go.dev/dl/)
+- **Templ**: `go install github.com/a-h/templ/cmd/templ@latest`
 
 ### 2. QPDF (Encryption Handler)
-- **Purpose**: Canon manuals are often encrypted; QPDF decrypts them to a temporary state for parsing.
 - **Install**: `winget install QPDF.QPDF`
 - **Verification**: Ensure `qpdf.exe` is in your PATH.
 
 ### 3. PDFtoText (Text Extractor)
-- **Purpose**: High-fidelity text extraction using `-table` mode to preserve column alignment.
 - **Source**: Part of Git for Windows (MinGW64).
 - **Default Path**: `C:\Program Files\Git\mingw64\bin\pdftotext.exe`
-- **Manual Path Update**: If installed elsewhere, update the path in `main.go` and `server.go`.
-
-### 4. SQLite3 CLI (Optional for Debugging)
-- **Purpose**: Direct querying of `parts.db`.
-- **Install**: `winget install SQLite.SQLite`
 
 ---
 
 ## 📂 Project Structure
-- `main.go`: The Database Builder. Scans `Parts/`, decrypts, and parses content.
-- `server.go`: The Web Front-end. Provides the UI and smart search logic.
-- `check_db.go`: CLI utility for quick database stats and cross-ref samples.
-- `investigate_db.go`: Tool for finding "junk" data and refining regex.
-- `Parts/`: Drop your `.pdf` manuals here (git-ignored, but the folder is tracked).
-- `parts.db`: The local SQLite database (git-ignored).
+- `models.go`: Shared types and constants (the `bow` package).
+- `cmd/server/`: The Web UI server (Templ + HTMX).
+- `cmd/builder/`: The PDF parsing and database building engine.
+- `cmd/tools/`: Diagnostic and utility scripts (e.g., `check_db.go`).
+- `Parts/`: Directory for source PDF manuals (git-ignored).
+- `assets/`: UI assets like the project logo.
+- `build_release.ps1`: Automation script for creating the standalone ZIP release.
 
 ---
 
-## 📖 Instructions for You (Jeremy)
+## 📖 Instructions
 
-### How to add new manuals:
-1.  Drop the new PDFs into the `Parts/` folder.
-2.  Run the builder: `go run main.go`.
-3.  The tool will automatically detect the series names and add the parts to your database.
+### How to develop/run from source:
+1.  **Generate Templates**: `templ generate ./cmd/server/`
+2.  **Start Server**: `go run ./cmd/server`
+3.  **Run Builder**: `go run ./cmd/builder` (add a PDF path as an argument for single-file mode).
 
-### How to use the Web UI:
-1.  Run the server: `go run server.go`.
-2.  Open [http://localhost:8080](http://localhost:8080).
-3.  Search for a part number (e.g., `WG8-5935` or `FE31525`) or a keyword (e.g., `Roller`).
+### How to create a new release:
+1.  Ensure `parts.db` is populated.
+2.  Run `./build_release.ps1`.
+3.  This creates `Bow.exe` and `Bow_Release.zip` in the root folder.
 
 ---
 
 ## 🗺️ Roadmap
-- [ ] **Incremental Updates**: Modify the builder to skip manuals already in the database, allowing for faster updates without full rebuilds.
-- [ ] **Accessory Expansion**: Ingest part catalogs for finishers, paper decks, and other peripherals to broaden cross-reference coverage.
-- [ ] **Client Release Mode**: Package a "Light" version of the tool containing only the Web UI and a pre-built database.
-- [ ] **Cloud Sync**: Implement an option for the client to check GitHub for an updated `parts.db` file and download it automatically.
+- [ ] **Accessory Expansion**: Ingest part catalogs for finishers, paper decks, and other peripherals.
+- [ ] **Cloud Sync**: Option for the client to check GitHub for an updated `parts.db` file automatically.
+- [ ] **Image Integration**: Explore linking part numbers to extracted diagram images from the PDFs.
 
 ---
 
 ## 📝 Developer Notes (For Gemini CLI)
-- **Regex Strategy**: The primary matcher is `(?m)(?:^|\s{2,})(\d{1,3})\s{2,}([A-Z0-9]{3}-[A-Z0-9]{4})-([A-Z0-9]{3})\s{1,}(\d*)\s+(.*?)(\s{2,}|\r|\n|$)`.
-- **Database Schema**: Uses `manuals`, `figures`, and `parts` tables. `base_part` is indexed for $O(1)$ search performance.
-- **Filters**: Explicitly ignores `SNL` (Serial Number) figures and descriptions < 3 characters to maintain data purity.
+- **Heartbeat System**: The server uses a `/pulse` endpoint. If the browser tab is closed for > 30s, the process exits automatically to free up port 8080.
+- **Embedded Files**: The release build embeds `parts.db` and `assets/`. On startup, `Bow.exe` extracts the DB to the current directory if it doesn't exist.
+- **Search Logic**: Supports both Part Number (normalized) and keyword searches across both `description` and `remarks` columns.
