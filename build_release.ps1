@@ -17,5 +17,10 @@ cp assets/* cmd/server/assets/
 Write-Host "Step 3: Building Bow.exe..."
 go build -o Bow.exe -ldflags="-s -w -H windowsgui" ./cmd/server/
 
-Write-Host "--- Build Complete: Bow.exe created ---" -ForegroundColor Green
+# 4. Package into Zip
+Write-Host "Step 4: Packaging into Zip..."
+if (Test-Path Bow_Release.zip) { Remove-Item Bow_Release.zip }
+Compress-Archive -Path Bow.exe -DestinationPath Bow_Release.zip
+
+Write-Host "--- Build Complete: Bow.exe and Bow_Release.zip created ---" -ForegroundColor Green
 Write-Host "Note: When you run Bow.exe, it will extract 'parts.db' to the current folder if it doesn't exist." -ForegroundColor Yellow

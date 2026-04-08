@@ -17,6 +17,7 @@ import (
 )
 
 func main() {
+	fmt.Printf("Bow PDF Builder v%s\n", bow.Version)
 	// Reaching up to parent directory for parts.db
 	db, err := sql.Open("sqlite", "parts.db")
 	if err != nil {

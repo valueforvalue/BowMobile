@@ -51,6 +51,12 @@ templ Layout(query string, results []bow.GroupedResult) {
 			<div id="results-container">
 				@Results(results, query)
 			</div>
+
+			<!-- Footer -->
+			<div class="mt-20 pb-10 text-center text-gray-400 text-xs border-t border-gray-200 pt-8">
+				<p>Bow Copier Parts Cross-Reference v{ bow.Version }</p>
+				<p class="mt-1">&copy; 2026</p>
+			</div>
 		</div>
 
 		<script>
