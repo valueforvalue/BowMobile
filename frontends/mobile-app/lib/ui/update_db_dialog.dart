@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../data/database_updater.dart';
 
 Future<void> showUpdateDbDialog(BuildContext context) async {
-  final controller = TextEditingController();
   var loading = false;
   String? errorMessage;
 
@@ -22,28 +21,13 @@ Future<void> showUpdateDbDialog(BuildContext context) async {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Paste a direct download URL for a parts.db file from a GitHub release or other trusted source.',
+                  'Download the latest parts.db from the official BowDB GitHub repository and replace the local database.',
                   style: TextStyle(fontSize: 13),
                 ),
                 const SizedBox(height: 12),
-                TextField(
-                  controller: controller,
-                  enabled: !loading,
-                  keyboardType: TextInputType.url,
-                  autocorrect: false,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText:
-                        'https://github.com/.../releases/download/.../parts.db',
-                    hintStyle: const TextStyle(fontSize: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                  ),
+                SelectableText(
+                  officialDatabaseUrl,
+                  style: const TextStyle(fontSize: 12),
                 ),
                 if (errorMessage != null) ...[
                   const SizedBox(height: 8),
@@ -79,21 +63,13 @@ Future<void> showUpdateDbDialog(BuildContext context) async {
                 onPressed: loading
                     ? null
                     : () async {
-                        final url = controller.text.trim();
-                        if (url.isEmpty) {
-                          setDialogState(() {
-                            errorMessage = 'Please enter a URL.';
-                          });
-                          return;
-                        }
-
                         setDialogState(() {
                           loading = true;
                           errorMessage = null;
                         });
 
                         try {
-                          await updateDatabaseFromUrl(url);
+                          await updateDatabaseFromOfficialSource();
                           if (!dialogContext.mounted) {
                             return;
                           }

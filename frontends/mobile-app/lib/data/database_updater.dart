@@ -8,6 +8,13 @@ import 'package:sqflite/sqflite.dart';
 
 import 'database_helper.dart';
 
+const officialDatabaseUrl =
+    'https://raw.githubusercontent.com/valueforvalue/BowDB/master/parts.db';
+
+Future<void> updateDatabaseFromOfficialSource() async {
+  await updateDatabaseFromUrl(officialDatabaseUrl);
+}
+
 Future<void> updateDatabaseFromUrl(String url) async {
   final uri = Uri.tryParse(url.trim());
   if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
