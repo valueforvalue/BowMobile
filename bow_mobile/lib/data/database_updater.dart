@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
@@ -10,18 +11,26 @@ import 'database_helper.dart';
 /// Downloads a new parts.db from [url] (raw GitHub URL or any direct download
 /// link) and replaces the on-device database.
 ///
-/// Throws on HTTP error, IO error, or if the downloaded file does not look
-/// like a valid SQLite database.
+/// Throws a user-readable [Exception] on HTTP error, IO error, timeout, or if
+/// the downloaded file does not look like a valid SQLite database.
 Future<void> updateDatabaseFromUrl(String url) async {
   final uri = Uri.parse(url.trim());
-  final response = await http
-      .get(uri, headers: {'Accept': '*/*'})
-      .timeout(const Duration(seconds: 60));
+
+  http.Response response;
+  try {
+    response = await http
+        .get(uri, headers: {'Accept': '*/*'})
+        .timeout(const Duration(seconds: 60));
+  } on TimeoutException {
+    throw Exception(
+      'Download timed out after 60 seconds. Please check your connection and try again.',
+    );
+  } on SocketException catch (e) {
+    throw Exception('Network error: ${e.message}. Please check your connection.');
+  }
 
   if (response.statusCode != 200) {
-    throw Exception(
-      'Download failed: HTTP ${response.statusCode}',
-    );
+    throw Exception('Download failed: HTTP ${response.statusCode}');
   }
 
   final bytes = response.bodyBytes;
@@ -44,11 +53,17 @@ Future<void> updateDatabaseFromUrl(String url) async {
 void _validateSqliteHeader(List<int> bytes) {
   const magic = [83, 81, 76, 105, 116, 101, 32, 102, 111, 114, 109, 97, 116, 32, 51, 0];
   if (bytes.length < 16) {
-    throw const FormatException('Downloaded file is not a valid SQLite database.');
+    throw const FormatException(
+      'Downloaded file is not a valid SQLite database. '
+      'Please verify the URL points to a parts.db file.',
+    );
   }
   for (int i = 0; i < 16; i++) {
     if (bytes[i] != magic[i]) {
-      throw const FormatException('Downloaded file is not a valid SQLite database.');
+      throw const FormatException(
+        'Downloaded file is not a valid SQLite database. '
+        'Please verify the URL points to a parts.db file.',
+      );
     }
   }
 }

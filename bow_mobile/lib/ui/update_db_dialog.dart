@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../data/database_updater.dart';
@@ -100,7 +103,7 @@ Future<void> showUpdateDbDialog(BuildContext context) async {
                         } catch (e) {
                           setDialogState(() {
                             loading = false;
-                            errorMessage = e.toString();
+                            errorMessage = _friendlyError(e);
                           });
                         }
                       },
@@ -115,4 +118,21 @@ Future<void> showUpdateDbDialog(BuildContext context) async {
       );
     },
   );
+}
+
+/// Converts a caught error to a short, user-readable message.
+String _friendlyError(Object e) {
+  if (e is TimeoutException) {
+    return 'Download timed out. Please check your connection and try again.';
+  }
+  if (e is SocketException) {
+    return 'Network error. Please check your connection and try again.';
+  }
+  if (e is FormatException) {
+    return e.message;
+  }
+  // Exception messages from updateDatabaseFromUrl are already user-friendly.
+  final msg = e.toString();
+  final prefix = 'Exception: ';
+  return msg.startsWith(prefix) ? msg.substring(prefix.length) : msg;
 }
