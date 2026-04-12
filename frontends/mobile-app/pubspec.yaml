@@ -17,6 +17,7 @@ dependencies:
   share_plus: ^10.1.4
   pdf: ^3.11.3
   http: ^1.4.0
+  path_provider_android: 2.2.15
 
 dev_dependencies:
   flutter_test:

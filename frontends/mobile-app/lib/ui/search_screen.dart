@@ -83,43 +83,48 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Center(
+      child: SizedBox(
+        height: 80,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Center(
               child: Image.asset(
                 'assets/images/logo.png',
                 height: 80,
                 fit: BoxFit.contain,
               ),
             ),
-          ),
-          PopupMenuButton<String>(
-            tooltip: 'More options',
-            onSelected: (value) async {
-              if (value == 'update_db') {
-                await showUpdateDbDialog(context);
-                if (mounted) {
-                  setState(() {
-                    _dbInfoVersion++;
-                  });
-                }
-              }
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(
-                value: 'update_db',
-                child: Row(
-                  children: [
-                    Icon(Icons.cloud_download_outlined, size: 20),
-                    SizedBox(width: 12),
-                    Text('Update DB from GitHub'),
-                  ],
-                ),
+            Positioned(
+              right: 0,
+              child: PopupMenuButton<String>(
+                tooltip: 'More options',
+                onSelected: (value) async {
+                  if (value == 'update_db') {
+                    await showUpdateDbDialog(context);
+                    if (mounted) {
+                      setState(() {
+                        _dbInfoVersion++;
+                      });
+                    }
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(
+                    value: 'update_db',
+                    child: Row(
+                      children: [
+                        Icon(Icons.cloud_download_outlined, size: 20),
+                        SizedBox(width: 12),
+                        Text('Update DB from GitHub'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
