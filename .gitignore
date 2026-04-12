@@ -9,3 +9,4 @@ app-debug.apk
 
 # Database (must be placed manually before building the APK)
 bow_mobile/assets/parts.db
+root/
