@@ -9,7 +9,7 @@ import 'package:sqflite/sqflite.dart';
 import 'database_helper.dart';
 
 const officialDatabaseUrl =
-    'https://raw.githubusercontent.com/valueforvalue/BowDB/master/parts.db';
+    'https://github.com/valueforvalue/BowDB/releases/latest/download/parts.db';
 
 Future<void> updateDatabaseFromOfficialSource() async {
   await updateDatabaseFromUrl(officialDatabaseUrl);
