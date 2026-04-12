@@ -1,31 +1,28 @@
-# Bow - Copier Parts Cross-Reference
+# BowMobile
 
 ## Project Overview
-Bow is a desktop application (built with Go and Wails) used for cross-referencing copier parts across different manuals and models. It uses a SQLite database (`parts.db`) stored as a sidecar file.
+BowMobile is a Flutter frontend for browsing the Bow SQLite parts database on mobile devices. This repository should stay focused on the mobile app plus a shared schema reference, not the builder or desktop frontend.
 
 ## Tech Stack
-- **Backend**: Go
-- **GUI Framework**: [Wails](https://wails.io/) (v2)
-- **Database**: SQLite (using `modernc.org/sqlite`)
-- **Templates**: [Templ](https://templ.guide/)
-- **Frontend**: Vite, Tailwind CSS, Vanilla JS
+- **Frontend**: Flutter
+- **Database**: SQLite database bundled as an app asset
+- **Language**: Dart
 
 ## Critical Files
-- `bow-gui/app.go`: Main application logic and backend bindings for Wails.
-- `cmd/server/server.go`: Standalone web server version.
-- `parts.db`: The SQLite database containing parts and manuals.
-- `cmd/builder/main.go`: The script used to parse PDFs and populate the database.
-- `build_release.ps1`: PowerShell script for building and packaging releases.
+- `frontends/mobile-app/lib/data/database_helper.dart`: Copies the bundled database into app storage and manages refreshes.
+- `frontends/mobile-app/lib/data/search_service.dart`: Implements the shared search behavior against the SQLite database.
+- `frontends/mobile-app/pubspec.yaml`: Declares bundled assets including `assets/parts.db`.
+- `shared/schema.sql`: Shared SQLite schema reference for the frontend/builder contract.
 
 ## Search Logic Mandates
-- Search must support partial part numbers (e.g., "WG8", "5935") and full part numbers ("WG8-5935").
-- The search query should be normalized (hyphens removed) to match against a normalized version of the part numbers in the database.
+- Search must support partial part numbers (e.g. `WG8`, `5935`) and full part numbers (`WG8-5935`).
+- Normalize hyphens when matching part numbers and base parts.
 - Always search across `part_number`, `base_part`, `description`, and `remarks`.
 
 ## Database Schema Notes
 - The `parts` table must include a `remarks` column.
-- If `remarks` is missing, it must be added via `ALTER TABLE parts ADD COLUMN remarks TEXT;`.
+- Keep `shared/schema.sql` aligned with the builder repo before updating bundled database assets.
 
 ## Development Workflows
-- Before building, run `templ generate ./bow-gui/`.
-- Use `go run cmd/tools/verify_search.go` to validate search logic against the database before committing changes.
+- Work from `frontends/mobile-app`.
+- Use `flutter test` for the existing test suite.
