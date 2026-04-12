@@ -1,36 +1,11 @@
-# Binaries
-*.exe
-*.exe~
-main
-check_db
-debug_coords
-test_page
-test_range
-extract_text
-
-# Templ
-*_templ.go
-
-# Wails
-bow-gui/frontend/dist/
-bow-gui/build/bin/
-
-# Release Assets (embedded during build)
-cmd/server/parts.db
-cmd/server/assets/
-
-# Database
-parts.db
-parts.db-journal
-
-# PDF Files
-Parts/*.pdf
-!Parts/.gitkeep
-
 # OS files
 .DS_Store
 Thumbs.db
 
 # Flutter release artifacts (built locally, not committed)
+bow_mobile/build/
 app-release.apk
 app-debug.apk
+
+# Database (must be placed manually before building the APK)
+bow_mobile/assets/parts.db

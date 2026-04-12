@@ -6,6 +6,7 @@ import 'db_info_footer.dart';
 import 'models_screen.dart';
 import 'results_list.dart';
 import 'share_parts.dart';
+import 'update_db_dialog.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -79,12 +80,38 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-      child: Center(
-        child: Image.asset(
-          'assets/images/logo.png',
-          height: 80,
-          fit: BoxFit.contain,
-        ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Center(
+              child: Image.asset(
+                'assets/images/logo.png',
+                height: 80,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+          PopupMenuButton<String>(
+            tooltip: 'More options',
+            onSelected: (value) {
+              if (value == 'update_db') {
+                showUpdateDbDialog(context);
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'update_db',
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_download_outlined, size: 20),
+                    SizedBox(width: 12),
+                    Text('Update DB from GitHub'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

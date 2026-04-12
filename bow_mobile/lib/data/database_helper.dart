@@ -40,4 +40,10 @@ class DatabaseHelper {
     final bytes = data.buffer.asUint8List();
     await File(dbPath).writeAsBytes(bytes, flush: true);
   }
+
+  /// Close the current database connection so the file can be replaced.
+  Future<void> closeDatabase() async {
+    await _db?.close();
+    _db = null;
+  }
 }

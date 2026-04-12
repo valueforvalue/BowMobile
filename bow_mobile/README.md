@@ -1,17 +1,28 @@
-# bow_mobile
+# Bow Mobile
 
-A new Flutter project.
+**Bow Mobile** is a Flutter Android app for searching the Canon copier parts cross-reference database (`parts.db`).
 
-## Getting Started
+## ⚠️ Before building the APK
 
-This project is a starting point for a Flutter application.
+Place an updated `parts.db` in `assets/parts.db` before running `flutter build apk`.
+The database is **bundled inside the APK** — if you skip this, the app will ship with stale data.
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+# Copy latest DB (from the CanonBow builder tool):
+cp /path/to/parts.db assets/parts.db
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+# !! REMINDER: Confirm parts.db is up to date before this step !!
+flutter build apk --release
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Development
+
+```bash
+flutter pub get
+flutter run
+```
+
+## Database Schema
+
+See [`../DATABASE_SCHEMA.md`](../DATABASE_SCHEMA.md) for the full SQLite schema.
+
