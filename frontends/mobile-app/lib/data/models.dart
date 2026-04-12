@@ -46,15 +46,20 @@ class ManualInfo {
 
 class DbInfo {
   final String lastUpdated;
+  final String parserVersion;
+  final String schemaVersion;
   final int partCount;
   final int sizeKb;
 
   const DbInfo({
     required this.lastUpdated,
+    required this.parserVersion,
+    required this.schemaVersion,
     required this.partCount,
     required this.sizeKb,
   });
 
   @override
-  String toString() => '$lastUpdated | Parts: $partCount | Size: $sizeKb KB';
+  String toString() =>
+      '$lastUpdated | Parts: $partCount | Size: $sizeKb KB | Parser: $parserVersion | Schema: $schemaVersion';
 }

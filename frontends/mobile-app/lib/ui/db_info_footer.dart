@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../data/models.dart';
 import '../data/search_service.dart';
 
+const _appVersion = '1.1.4';
+
 class DbInfoFooter extends StatefulWidget {
   const DbInfoFooter({super.key});
 
@@ -31,7 +33,7 @@ class _DbInfoFooterState extends State<DbInfoFooter> {
               const Divider(),
               const SizedBox(height: 12),
               Text(
-                'Bow Mobile v1.1.3',
+                'Bow Mobile v$_appVersion',
                 style: TextStyle(color: Colors.grey.shade400, fontSize: 11),
               ),
               const SizedBox(height: 4),

@@ -104,11 +104,37 @@ class SearchService {
     final db = await DatabaseHelper.instance.database;
 
     String lastUpdated = 'Unknown';
+    String parserVersion = 'Unknown';
+    String schemaVersion = 'Unknown';
+
+    final metadataColumns = await db.rawQuery('PRAGMA table_info(metadata)');
+    final hasParserVersion = metadataColumns.any(
+      (row) => row['name'] == 'parser_version',
+    );
+    final hasSchemaVersion = metadataColumns.any(
+      (row) => row['name'] == 'schema_version',
+    );
+
+    final fields = <String>['last_updated'];
+    if (hasParserVersion) {
+      fields.add('parser_version');
+    }
+    if (hasSchemaVersion) {
+      fields.add('schema_version');
+    }
+
     final metaRows = await db.rawQuery(
-      'SELECT last_updated FROM metadata WHERE id = 1',
+      'SELECT ${fields.join(', ')} FROM metadata WHERE id = 1',
     );
     if (metaRows.isNotEmpty) {
-      lastUpdated = metaRows.first['last_updated'] as String? ?? 'Unknown';
+      final row = metaRows.first;
+      lastUpdated = row['last_updated'] as String? ?? 'Unknown';
+      if (hasParserVersion) {
+        parserVersion = row['parser_version'] as String? ?? 'Unknown';
+      }
+      if (hasSchemaVersion) {
+        schemaVersion = row['schema_version'] as String? ?? 'Unknown';
+      }
     }
 
     int count = 0;
@@ -126,6 +152,12 @@ class SearchService {
       }
     } catch (_) {}
 
-    return DbInfo(lastUpdated: lastUpdated, partCount: count, sizeKb: sizeKb);
+    return DbInfo(
+      lastUpdated: lastUpdated,
+      parserVersion: parserVersion,
+      schemaVersion: schemaVersion,
+      partCount: count,
+      sizeKb: sizeKb,
+    );
   }
 }
