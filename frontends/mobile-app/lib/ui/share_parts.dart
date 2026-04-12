@@ -35,7 +35,7 @@ Future<void> shareSelectedParts(
           ),
         ),
         pw.SizedBox(height: 16),
-        pw.Table.fromTextArray(
+        pw.TableHelper.fromTextArray(
           headers: [
             'Base Part',
             'Description',

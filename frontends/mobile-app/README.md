@@ -14,3 +14,7 @@ Flutter client for the Bow parts cross-reference database.
 ## Contract
 - Search behavior must stay aligned with the builder and other frontends.
 - The schema reference for this repo lives at `..\..\shared\schema.sql`.
+
+## Updating the DB from GitHub
+- Use the overflow menu on the search screen and choose **Update DB from GitHub**.
+- Provide a direct download URL to a `parts.db` file; the app validates the SQLite header before replacing the local database.

@@ -32,12 +32,16 @@ class DatabaseHelper {
 
   /// Force-replace the on-device DB with the bundled asset (e.g. after an app update).
   Future<void> resetToAsset() async {
-    _db?.close();
-    _db = null;
+    await closeDatabase();
     final docsDir = await getApplicationDocumentsDirectory();
     final dbPath = p.join(docsDir.path, 'parts.db');
     final data = await rootBundle.load('assets/parts.db');
     final bytes = data.buffer.asUint8List();
     await File(dbPath).writeAsBytes(bytes, flush: true);
+  }
+
+  Future<void> closeDatabase() async {
+    await _db?.close();
+    _db = null;
   }
 }

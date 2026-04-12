@@ -12,6 +12,10 @@ BowMobile is the Flutter frontend for the Bow parts cross-reference database. Th
 3. `flutter test`
 4. `flutter run`
 
+## Updating the database
+- The app now includes **Update DB from GitHub** in the search screen overflow menu.
+- Paste a direct download URL for a `parts.db` release asset and the app will replace the on-device database after validating the download.
+
 ## Database contract
 - The app ships with a bundled `assets/parts.db` and queries the production `manuals`, `metadata`, and `parts` tables.
 - `shared/schema.sql` is the schema reference this frontend should validate against when the builder changes.
